@@ -1,7 +1,7 @@
 package bgu.spl.mics.application.services;
 
 import bgu.spl.mics.MicroService;
-import bgu.spl.mics.application.objects.LiDarTracker;
+import bgu.spl.mics.application.objects.LiDarWorkerTracker;
 import bgu.spl.mics.application.objects.TrackedObject;
 import bgu.spl.mics.example.messages.DetectObjectsEvent;
 import bgu.spl.mics.example.messages.TerminatedBroadcast;
@@ -19,13 +19,13 @@ import java.util.List;
  * observations.
  */
 public class LiDarService extends MicroService {
-    private final LiDarTracker liDarTracker;
+    private final LiDarWorkerTracker liDarTracker;
     /**
      * Constructor for LiDarService.
      *
      * @param liDarTracker The LiDAR tracker object that this service will use to process data.
      */
-    public LiDarService(LiDarTracker liDarTracker) {
+    public LiDarService(LiDarWorkerTracker liDarTracker) {
         super("LiDarService_" + liDarTracker.getId());
         this.liDarTracker = liDarTracker;
     }

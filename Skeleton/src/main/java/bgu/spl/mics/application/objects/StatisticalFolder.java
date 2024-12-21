@@ -15,5 +15,6 @@ public class StatisticalFolder {
     }
 
     public static void incrementTrackedObjects(int newTrackedObjects) {
+
     }
 }

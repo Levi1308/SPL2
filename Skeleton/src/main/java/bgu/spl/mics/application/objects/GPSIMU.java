@@ -8,6 +8,6 @@ import java.util.List;
  */
 public class GPSIMU {
     private int currentTick;
-    private Status status;
+    private STATUS status;
     private List<Pose> PoseList;
 }

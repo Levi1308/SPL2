@@ -5,16 +5,12 @@ import java.util.List;
  * Represents a camera sensor on the robot.
  * Responsible for detecting objects in the environment.
  */
-enum Status{
-    Up,
-    Down,
-    Error
-}
+
 public class Camera {
     private final int id;
     private final int frequency;
     private final List<StampedDetectedObjects> detectedObjectsList;
-    private Status status;
+    private STATUS status;
 
 
     /**
@@ -27,7 +23,7 @@ public class Camera {
         this.id = id;
         this.frequency = frequency;
         this.detectedObjectsList = new ArrayList<>();
-        this.status = Status.Up;
+        this.status = STATUS.UP;
     }
     /**
      * Detects objects at a specific time tick.
@@ -80,5 +76,22 @@ public class Camera {
      */
     public List<StampedDetectedObjects> getDetectedObjectsList() {
         return detectedObjectsList;
+    }
+
+    public void updateStatistics() {
+        StatisticalFolder.incrementDetectedObjects(detectedObjectsList.size());
+    }
+
+    public List<DetectedObject> getDetectedObjects(int tick) {
+        for (StampedDetectedObjects stamped : detectedObjectsList) {
+            if (stamped.getTime() == tick) {
+                return stamped.getDetectedObjects();
+            }
+        }
+        return new ArrayList<>();
+    }
+
+    public boolean shouldSendEvent(int tick) {
+        return tick % frequency == 0;
     }
 }

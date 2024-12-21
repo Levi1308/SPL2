@@ -10,4 +10,10 @@ public class StatisticalFolder {
     private int numDetectedObjects;
     private int numTrackedObjects;
     private int numLandmarks;
+
+    public static void incrementDetectedObjects(int size) {
+    }
+
+    public static void incrementTrackedObjects(int newTrackedObjects) {
+    }
 }

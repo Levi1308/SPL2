@@ -1,48 +1,84 @@
 package bgu.spl.mics.application.objects;
-
+import java.util.ArrayList;
 import java.util.List;
-
 /**
  * Represents a camera sensor on the robot.
  * Responsible for detecting objects in the environment.
  */
-
+enum Status{
+    Up,
+    Down,
+    Error
+}
 public class Camera {
-    private int id;
-    private int frequency;
-    public enum Status{
-        Up,Down,Error;
-    }
+    private final int id;
+    private final int frequency;
+    private final List<StampedDetectedObjects> detectedObjectsList;
     private Status status;
-    private List<StampedDetectedObjects> detectedObjects;
-    public Camera()
-    {
-       //implement
+
+
+    /**
+     * Constructor for Camera.
+     *
+     * @param id        The unique identifier for the camera.
+     * @param frequency The detection frequency (in ticks).
+     */
+    public Camera(int id, int frequency) {
+        this.id = id;
+        this.frequency = frequency;
+        this.detectedObjectsList = new ArrayList<>();
+        this.status = Status.Up;
+    }
+    /**
+     * Detects objects at a specific time tick.
+     * This simulates the camera capturing objects in the environment.
+     *
+     * @param time The current tick time during detection.
+     * @return A list of detected objects with time stamps.
+     */
+    public StampedDetectedObjects detectObjects(int time) {
+        List<DetectedObject> detectedObjects = generateRandomObjects();
+        StampedDetectedObjects stampedObjects = new StampedDetectedObjects(time, detectedObjects);
+        detectedObjectsList.add(stampedObjects);
+        return stampedObjects;
     }
 
-    public synchronized int getId() {
+    /**
+     * Generates random detected objects for simulation purposes.
+     *
+     * @return List of randomly detected objects.
+     */
+    private List<DetectedObject> generateRandomObjects() {
+        List<DetectedObject> objects = new ArrayList<>();
+        int numObjects = (int) (Math.random() * 5) + 1;  // Random number of objects (1 to 5)
+
+        for (int i = 0; i < numObjects; i++) {
+            String id = "Obj_" + (int) (Math.random() * 1000);
+            String description = "Object Description " + i;
+            objects.add(new DetectedObject(id, description));
+        }
+
+        return objects;
+    }
+
+    /**
+     * @return The camera's unique ID.
+     */
+    public int getId() {
         return id;
     }
 
-    public synchronized int getFrequency() {
+    /**
+     * @return The camera's detection frequency.
+     */
+    public int getFrequency() {
         return frequency;
     }
-    public synchronized Status getStatus(){
-        return status;
-    }
-    public synchronized List<StampedDetectedObjects> getDetectedObjects(){
-        return detectedObjects;
-    }
 
-    public synchronized void setStatus(Status status) {
-        this.status = status;
-    }
-
-    public synchronized void setFrequency(int frequency) {
-        this.frequency = frequency;
-    }
-
-    public synchronized void addDetectedObject(StampedDetectedObjects object){
-
+    /**
+     * @return List of all objects detected by this camera.
+     */
+    public List<StampedDetectedObjects> getDetectedObjectsList() {
+        return detectedObjectsList;
     }
 }

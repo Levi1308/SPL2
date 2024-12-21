@@ -10,4 +10,40 @@ public class StatisticalFolder {
     private int numDetectedObjects;
     private int numTrackedObjects;
     private int numLandmarks;
+
+    public StatisticalFolder(int systemRuntime, int numDetectedObjects, int numTrackedObjects, int numLandmarks) {
+        this.systemRuntime = systemRuntime;
+        this.numDetectedObjects = numDetectedObjects;
+        this.numTrackedObjects = numTrackedObjects;
+        this.numLandmarks = numLandmarks;
+    }
+
+    public StatisticalFolder() {
+
+    }
+
+    public int getNumDetectedObjects() {
+        return numDetectedObjects;
+    }
+
+    public int getNumLandmarks() {
+        return numLandmarks;
+    }
+
+    public int getNumTrackedObjects() {
+        return numTrackedObjects;
+    }
+
+    public int getSystemRuntime() {
+        return systemRuntime;
+    }
+    public void IncreaseNumLandmarks(){
+        this.numLandmarks++;
+    }
+    public void IncreaseNumDetectedobjects(){
+        this.numDetectedObjects++;
+    }
+    public void IncreaseNumTrackedobjects(){
+        this.numTrackedObjects++;
+    }
 }

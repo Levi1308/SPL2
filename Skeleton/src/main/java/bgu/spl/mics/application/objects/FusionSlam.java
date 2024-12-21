@@ -16,18 +16,11 @@ public class FusionSlam {
     private StatisticalFolder stats;
     boolean created=false;
     private FusionSlam(){
+        landsmark=new HashMap<>();
+        poses =new ArrayList<>();
+        stats=new StatisticalFolder();
+    }
 
-    }
-    public FusionSlam getInstance(){
-        if(!created)
-        {
-            landsmark=new HashMap<>();
-            poses =new ArrayList<>();
-            stats=new StatisticalFolder();
-            created=true;
-        }
-        return this;
-    }
 
     public List<Pose> getPoses() {
         return poses;
@@ -40,6 +33,8 @@ public class FusionSlam {
     public StatisticalFolder getStats() {
         return stats;
     }
+
+
     public void AddPose(Pose pose){
         poses.add(pose);
     }
@@ -55,8 +50,33 @@ public class FusionSlam {
         {
             landsmark.get(trackedObject.getId()).UpdateCoordinates(trackedObject.getCoordinate());
         }
+
+    }
+    public void UpdateMap(){
+
+    }
+    public void CoordinateTransformation(){
+
+    }
+    public void PoseEvent(){
+
+    }
+    public void TrackedObjectEvent(){
+
     }
     private static class FusionSlamHolder {
+        private FusionSlam Instance=null;
+        private FusionSlamHolder()
+        {
 
+        }
+        public FusionSlam getInstance(){
+            if(Instance==null)
+            {
+                Instance=new FusionSlam();
+                return Instance;
+            }
+            return Instance;
+        }
     }
 }

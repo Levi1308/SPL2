@@ -40,7 +40,6 @@ public class LandMark {
       for(CloudPoint cp:coordinates){
          sumx+=cp.getX();
          sumy+=cp.getY();
-         sumz+=cp.getZ();
       }
       //continue implement
    }

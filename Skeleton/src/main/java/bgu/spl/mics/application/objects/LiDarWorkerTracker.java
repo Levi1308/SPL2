@@ -11,12 +11,14 @@ import java.util.List;
 public class LiDarWorkerTracker {
 
     private int id;
-    List<StampedCloudPoints> stampedCloudPointsList;
+    private STATUS status;
     private int frequency;
+    List<TrackedObject> lastTrackedobjects;
     public LiDarWorkerTracker(int id, int frequency) {
         this.id = id;
-        this.stampedCloudPointsList = new ArrayList<>();
+        this.lastTrackedobjects = new ArrayList<>();
         this.frequency = frequency;
+        status=STATUS.UP;
     }
 
     public int getId() {
@@ -27,7 +29,22 @@ public class LiDarWorkerTracker {
         return frequency;
     }
 
-    public List<StampedCloudPoints> getStampedCloudPointsList() {
-        return stampedCloudPointsList;
+    public STATUS getStatus() {
+        return status;
+    }
+
+    public List<TrackedObject> getLastTrackedobjects() {
+        return lastTrackedobjects;
+    }
+
+    public void setFrequency(int frequency) {
+        this.frequency = frequency;
+    }
+    //public void onDetectObjectsEvent(DetectObjectsEvent event) {
+    //}
+    private void processLiDARData(List<StampedCloudPoints> cloudPoints) {
+    }
+    private void sendTrackedObjectsEvent() {
+
     }
 }

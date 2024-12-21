@@ -50,6 +50,23 @@ public class Camera {
     public List<StampedDetectedObjects> getDetectedObjectsList() {
         return detectedObjectsList;
     }
+
+    public void updateStatistics() {
+        //StatisticalFolder.(detectedObjectsList.size());
+    }
+
+    public List<DetectedObject> getDetectedObjects(int tick) {
+        for (StampedDetectedObjects stamped : detectedObjectsList) {
+            if (stamped.getTime() == tick) {
+                return stamped.getDetectedObjects();
+            }
+        }
+        return new ArrayList<>();
+    }
+
+    public boolean shouldSendEvent(int tick) {
+        return tick % frequency == 0;
+    }
 }
 /*
     /**

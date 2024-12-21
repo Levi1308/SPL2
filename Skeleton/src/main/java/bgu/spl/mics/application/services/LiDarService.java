@@ -1,6 +1,14 @@
 package bgu.spl.mics.application.services;
 
 import bgu.spl.mics.MicroService;
+import bgu.spl.mics.application.objects.LiDarWorkerTracker;
+import bgu.spl.mics.application.objects.TrackedObject;
+import bgu.spl.mics.example.messages.DetectObjectsEvent;
+import bgu.spl.mics.example.messages.TerminatedBroadcast;
+import bgu.spl.mics.example.messages.TickBroadcast;
+import bgu.spl.mics.example.messages.TrackedObjectsEvent;
+
+import java.util.List;
 
 /**
  * LiDarService is responsible for processing data from the LiDAR sensor and
@@ -11,15 +19,15 @@ import bgu.spl.mics.MicroService;
  * observations.
  */
 public class LiDarService extends MicroService {
-
+    private final LiDarWorkerTracker liDarTracker;
     /**
      * Constructor for LiDarService.
      *
      * @param liDarTracker The LiDAR tracker object that this service will use to process data.
      */
-    public LiDarService(LiDarTracker liDarTracker) {
-        super("Change_This_Name");
-        // TODO Implement this
+    public LiDarService(LiDarWorkerTracker liDarTracker) {
+        super("LiDarService_" + liDarTracker.getId());
+        this.liDarTracker = liDarTracker;
     }
 
     /**
@@ -29,6 +37,32 @@ public class LiDarService extends MicroService {
      */
     @Override
     protected void initialize() {
-        // TODO Implement this
-    }
+/*
+        subscribeBroadcast(TickBroadcast.class, tick -> {
+            if (LiDarWorkerTracker.isOperational()) {
+                List<TrackedObject> trackedObjects = LiDarWorkerTracker.trackObjects(tick.getTick());
+                if (!trackedObjects.isEmpty()) {
+                    sendEvent(new TrackedObjectsEvent(trackedObjects));
+                    liDarTracker.updateStatistics(trackedObjects.size());
+                }
+            }
+        });
+
+
+        subscribeEvent(DetectObjectsEvent.class, event -> {
+            List<TrackedObject> trackedObjects = liDarTracker.processDetection(event.getDetectedObjects());
+            if (!trackedObjects.isEmpty()) {
+                complete(event, trackedObjects);
+                sendEvent(new TrackedObjectsEvent(trackedObjects));
+                liDarTracker.updateStatistics(trackedObjects.size());
+            }
+        });
+
+
+        subscribeBroadcast(TerminatedBroadcast.class, terminated -> {
+            System.out.println(getName() + " received termination signal.");
+            terminate();
+        });
+    }*/
+}
 }

@@ -1,4 +1,4 @@
-package bgu.spl.mics.example.messages;
+package bgu.spl.mics.events;
 
 import bgu.spl.mics.Broadcast;
 

@@ -2,10 +2,10 @@ package bgu.spl.mics.application.services;
 
 import bgu.spl.mics.MicroService;
 import bgu.spl.mics.application.objects.FusionSlam;
-import bgu.spl.mics.example.messages.PoseEvent;
-import bgu.spl.mics.example.messages.TerminatedBroadcast;
-import bgu.spl.mics.example.messages.TickBroadcast;
-import bgu.spl.mics.example.messages.TrackedObjectsEvent;
+import bgu.spl.mics.events.PoseEvent;
+import bgu.spl.mics.events.TerminatedBroadcast;
+import bgu.spl.mics.events.TickBroadcast;
+import bgu.spl.mics.events.TrackedObjectsEvent;
 
 /**
  * FusionSlamService integrates data from multiple sensors to build and update

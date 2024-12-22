@@ -2,13 +2,6 @@ package bgu.spl.mics.application.services;
 
 import bgu.spl.mics.MicroService;
 import bgu.spl.mics.application.objects.LiDarWorkerTracker;
-import bgu.spl.mics.application.objects.TrackedObject;
-import bgu.spl.mics.example.messages.DetectObjectsEvent;
-import bgu.spl.mics.example.messages.TerminatedBroadcast;
-import bgu.spl.mics.example.messages.TickBroadcast;
-import bgu.spl.mics.example.messages.TrackedObjectsEvent;
-
-import java.util.List;
 
 /**
  * LiDarService is responsible for processing data from the LiDAR sensor and

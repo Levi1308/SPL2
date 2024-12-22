@@ -1,4 +1,4 @@
-package bgu.spl.mics.example.messages;
+package bgu.spl.mics.events;
 
 
 
@@ -12,12 +12,19 @@ import java.util.List;
  */
 public class DetectObjectsEvent implements Event<List<DetectedObject>> {
     private final List<DetectedObject> detectedObjects;
+    private int time;
 
-    public DetectObjectsEvent(List<DetectedObject> detectedObjects) {
+    public DetectObjectsEvent(List<DetectedObject> detectedObjects,int time) {
         this.detectedObjects = detectedObjects;
+        this.time=time;
     }
 
+    public int getTime() {
+        return time;
+    }
     public List<DetectedObject> getDetectedObjects() {
+
         return detectedObjects;
     }
+
 }

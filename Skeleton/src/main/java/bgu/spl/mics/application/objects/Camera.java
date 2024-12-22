@@ -1,6 +1,10 @@
 package bgu.spl.mics.application.objects;
+
+import bgu.spl.mics.events.DetectObjectsEvent;
+
 import java.util.ArrayList;
 import java.util.List;
+
 /**
  * Represents a camera sensor on the robot.
  * Responsible for detecting objects in the environment.
@@ -11,32 +15,43 @@ public class Camera {
     private final int frequency;
     private final List<StampedDetectedObjects> detectedObjectsList;
     private STATUS status;
+    private int tick;
 
     public Camera(int id, int frequency) {
         this.id = id;
         this.frequency = frequency;
         this.detectedObjectsList = new ArrayList<>();
         this.status = STATUS.UP;
+        tick = 0;
     }
 
-    public StampedDetectedObjects detectObjects(int time) {
-        List<DetectedObject> detectedObjects = generateRandomObjects();
-        StampedDetectedObjects stampedObjects = new StampedDetectedObjects(time, detectedObjects);
-        detectedObjectsList.add(stampedObjects);
-        return stampedObjects;
-    }
+    public void DetectObjects(DetectedObject object, int time) {
+        List<DetectedObject> tempObjects = getDetectedObjectsList(time);
+        if (tempObjects != null) {
+            if (!tempObjects.contains(object)) {
+                List<DetectedObject> newStampObj = getDetectedObjectsList(time + frequency);
+                if (newStampObj != null)
+                    newStampObj.add(object);
+                else {
+                    StampedDetectedObjects newObj = new StampedDetectedObjects(time + frequency);
+                    newObj.AddDetectedObject(object);
+                    detectedObjectsList.add(newObj);
+                }
+            }
 
-    private List<DetectedObject> generateRandomObjects() {
-        List<DetectedObject> objects = new ArrayList<>();
-        int numObjects = (int) (Math.random() * 5) + 1;  // Random number of objects (1 to 5)
-
-        for (int i = 0; i < numObjects; i++) {
-            String id = "Obj_" + (int) (Math.random() * 1000);
-            String description = "Object Description " + i;
-            objects.add(new DetectedObject(id, description));
+        } else {
+            StampedDetectedObjects newObj = new StampedDetectedObjects(time + frequency);
+            newObj.AddDetectedObject(object);
+            detectedObjectsList.add(newObj);
         }
 
-        return objects;
+    }
+
+    public void onTick() {
+        if (shouldSendEvent()) {
+           //DetectObjectsEvent
+        }
+        tick++;
     }
 
     public int getId() {
@@ -47,7 +62,7 @@ public class Camera {
         return frequency;
     }
 
-    public List<StampedDetectedObjects> getDetectedObjectsList() {
+    public List<StampedDetectedObjects> getStampedDetectedObjectsList() {
         return detectedObjectsList;
     }
 
@@ -55,22 +70,16 @@ public class Camera {
         //StatisticalFolder.(detectedObjectsList.size());
     }
 
-    public List<DetectedObject> getDetectedObjects(int tick) {
+    public List<DetectedObject> getDetectedObjectsList(int time) {
         for (StampedDetectedObjects stamped : detectedObjectsList) {
-            if (stamped.getTime() == tick) {
+            if (stamped.getTime() == time) {
                 return stamped.getDetectedObjects();
             }
         }
-        return new ArrayList<>();
+        return null;
     }
 
-    public boolean shouldSendEvent(int tick) {
+    public boolean shouldSendEvent() {
         return tick % frequency == 0;
     }
 }
-/*
-    /**
-     * Generates random detected objects for simulation purposes.
-     *
-     * @return List of randomly detected objects.
-     */

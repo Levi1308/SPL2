@@ -3,9 +3,9 @@ package bgu.spl.mics.application.services;
 import bgu.spl.mics.Future;
 import bgu.spl.mics.MicroService;
 import bgu.spl.mics.application.objects.Camera;
-import bgu.spl.mics.example.messages.DetectObjectsEvent;
-import bgu.spl.mics.example.messages.TerminatedBroadcast;
-import bgu.spl.mics.example.messages.TickBroadcast;
+import bgu.spl.mics.events.DetectObjectsEvent;
+import bgu.spl.mics.events.TerminatedBroadcast;
+import bgu.spl.mics.events.TickBroadcast;
 
 /**
  * CameraService is responsible for processing data from the camera and

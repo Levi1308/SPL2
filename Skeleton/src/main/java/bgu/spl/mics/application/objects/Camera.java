@@ -1,5 +1,8 @@
 package bgu.spl.mics.application.objects;
 
+import bgu.spl.mics.Future;
+import bgu.spl.mics.application.messages.DetectObjectsEvent;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,9 +14,10 @@ import java.util.List;
 public class Camera {
     private final int id;
     private final int frequency;
-    private final List<StampedDetectedObjects> detectedObjectsList;
+    private List<StampedDetectedObjects> detectedObjectsList;
     private STATUS status;
     private int tick;
+
 
     public Camera(int id, int frequency) {
         this.id = id;
@@ -23,6 +27,20 @@ public class Camera {
         tick = 0;
     }
 
+    /**
+     * Adds detected objects to the camera's internal list.
+     *
+     * @param detectedObjects The list of detected objects to add.
+     * @param tick            The tick at which the objects were detected.
+     */
+    public void addDetectedObjects(List<DetectedObject> detectedObjects, int tick) {
+        if (!detectedObjects.isEmpty()) {
+            StampedDetectedObjects stamped = new StampedDetectedObjects(tick,detectedObjects);
+            detectedObjectsList.add(stamped);
+            System.out.println("Camera " + id + " detected " + detectedObjects.size() + " objects at tick " + tick);
+        }
+    }
+/*
     public void DetectObjects(DetectedObject object, int time) {
         List<DetectedObject> tempObjects = getDetectedObjectsList(time);
         if (tempObjects != null) {
@@ -44,13 +62,16 @@ public class Camera {
         }
 
     }
-
-    public void onTick() {
-        if (shouldSendEvent()) {
-           //DetectObjectsEvent
-        }
-        tick++;
+*/
+    public void handleError(){
+        this.status = STATUS.ERROR;
     }
+
+    public STATUS getStatus(){return this.status;}
+
+    public int getTick(){return this.tick;}
+
+    public void setTick(int tick){this.tick = tick;}
 
     public int getId() {
         return id;
@@ -64,9 +85,6 @@ public class Camera {
         return detectedObjectsList;
     }
 
-    public void updateStatistics() {
-        //StatisticalFolder.(detectedObjectsList.size());
-    }
 
     public List<DetectedObject> getDetectedObjectsList(int time) {
         for (StampedDetectedObjects stamped : detectedObjectsList) {
@@ -77,7 +95,5 @@ public class Camera {
         return null;
     }
 
-    public boolean shouldSendEvent() {
-        return tick % frequency == 0;
-    }
+
 }

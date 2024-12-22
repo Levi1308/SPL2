@@ -9,9 +9,9 @@ public class StampedDetectedObjects {
     private final int time;
     private final List<DetectedObject> detectedObjects;
 
-    public StampedDetectedObjects(int time) {
+    public StampedDetectedObjects(int time, List<DetectedObject> detectedObjects) {
         this.time = time;
-        this.detectedObjects = new ArrayList<>();
+        this.detectedObjects = detectedObjects;
     }
 
     public int getTime() {

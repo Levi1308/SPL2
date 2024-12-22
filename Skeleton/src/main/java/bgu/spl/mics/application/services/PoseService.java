@@ -2,8 +2,8 @@ package bgu.spl.mics.application.services;
 
 import bgu.spl.mics.MicroService;
 import bgu.spl.mics.application.objects.GPSIMU;
-import bgu.spl.mics.events.TerminatedBroadcast;
-import bgu.spl.mics.events.TickBroadcast;
+import bgu.spl.mics.application.messages.TerminatedBroadcast;
+import bgu.spl.mics.application.messages.TickBroadcast;
 
 /**
  * PoseService is responsible for maintaining the robot's current pose (position and orientation)

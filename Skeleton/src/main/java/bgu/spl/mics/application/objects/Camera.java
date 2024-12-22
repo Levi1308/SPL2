@@ -1,7 +1,5 @@
 package bgu.spl.mics.application.objects;
 
-import bgu.spl.mics.events.DetectObjectsEvent;
-
 import java.util.ArrayList;
 import java.util.List;
 

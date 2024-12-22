@@ -1,8 +1,8 @@
 package bgu.spl.mics.application.services;
 
 import bgu.spl.mics.MicroService;
-import bgu.spl.mics.events.TerminatedBroadcast;
-import bgu.spl.mics.events.TickBroadcast;
+import bgu.spl.mics.application.messages.TerminatedBroadcast;
+import bgu.spl.mics.application.messages.TickBroadcast;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;

@@ -11,10 +11,11 @@ import bgu.spl.mics.application.objects.Camera.*;
 public class GPSIMU {
     private int currentTick;
     private STATUS status;
-    private List<Pose> poseList;
+    private List<Pose> poses;
     public GPSIMU(){
         currentTick=0;
-        poseList=new ArrayList<>();
+        poses=new ArrayList<>();
+        status=STATUS.UP;
     }
 
     public int getCurrentTick() {
@@ -22,7 +23,7 @@ public class GPSIMU {
     }
 
     public List<Pose> getPoseList() {
-        return poseList;
+        return poses;
     }
 
     public STATUS getStatus() {
@@ -35,5 +36,8 @@ public class GPSIMU {
 
     public void setStatus(STATUS status) {
         this.status=status;
+    }
+    public void addPose(Pose pose){
+        poses.add(pose);
     }
 }

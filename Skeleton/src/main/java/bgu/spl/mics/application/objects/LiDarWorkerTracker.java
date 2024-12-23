@@ -14,6 +14,7 @@ public class LiDarWorkerTracker {
     private STATUS status;
     private int frequency;
     List<TrackedObject> lastTrackedobjects;
+
     public LiDarWorkerTracker(int id, int frequency) {
         this.id = id;
         this.lastTrackedobjects = new ArrayList<>();

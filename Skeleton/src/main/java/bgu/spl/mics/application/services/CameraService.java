@@ -1,6 +1,7 @@
 package bgu.spl.mics.application.services;
 
 import bgu.spl.mics.Future;
+import bgu.spl.mics.application.messages.CrashedBroadcast;
 import bgu.spl.mics.application.objects.DetectedObject;
 import bgu.spl.mics.MicroService;
 import bgu.spl.mics.application.objects.Camera;
@@ -94,6 +95,12 @@ public class CameraService extends MicroService {
         }
         return detectedObjects;
     }
+
+    private void handleError() {
+        sendBroadcast(new CrashedBroadcast("Camera", "camera1", "Camera disconnected"));
+        terminate();
+    }
+
 
 
 

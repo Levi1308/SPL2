@@ -24,9 +24,9 @@ public class MessageBusImpl implements MessageBus {
 	private  Map<Class<? extends Broadcast>, List<MicroService>> broadcastSubscribers;
 	private Map<MicroService, Queue<Message>> queues;
 	private  Map<Event, Future> eventFutures;
-	private static MessageBusImpl instance;
+	private static MessageBusImpl instance = null;
 
-	public MessageBusImpl() {
+	private MessageBusImpl() {
 		this.eventSubscribers = new HashMap<>();
 		this.broadcastSubscribers = new HashMap<>();
 		this.queues = new HashMap<>();

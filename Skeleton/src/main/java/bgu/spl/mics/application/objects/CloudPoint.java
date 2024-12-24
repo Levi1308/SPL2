@@ -5,23 +5,24 @@ package bgu.spl.mics.application.objects;
  * These points are used to generate a point cloud representing objects in the environment.
  */
 public class CloudPoint {
-    private int x;
-    private int y;
-    private int z;
-    public CloudPoint(int x,int y,int z){
+    private float x;
+    private float y;
+    private float z;
+
+    public CloudPoint(float x,float y,float z){
         this.x=x;
         this.y=y;
         this.z=z;
     }
 
-    public int getX() {
+    public float getX() {
         return x;
     }
 
-    public int getY() {
+    public float getY() {
         return y;
     }
-    public int getZ() {
+    public float getZ() {
         return z;
     }
 

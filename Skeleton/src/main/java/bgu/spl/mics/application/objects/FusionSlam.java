@@ -11,34 +11,76 @@ import java.util.Map;
  * Implements the Singleton pattern to ensure a single instance of FusionSlam exists.
  */
 public class FusionSlam {
-    private final List<LandMark> landmarks;
-    private List<Pose> poses;
-    private final List<TrackedObject> trackedObjects;
+    private Pose currentPose;
+    private Map<String, LandMark> landmarks;
+    private Map<String,TrackedObject> trackedObjects;
+    private int Tick;
 
 
     /**
      * Constructor for FusionSlam.
-     * Initializes empty lists for landmarks, tracked objects, and pose history.
+     * Initializes empty lists for landmarks and tracked objects.
      */
-    private FusionSlam(){
-        this.landmarks = new ArrayList<>();
-        this.trackedObjects = new ArrayList<>();
-        this.poses = new ArrayList<>();
+    public FusionSlam() {
+        this.currentPose = new Pose(0, 0, 0,0);
+        this.landmarks =  new HashMap<>();
+        this.trackedObjects = new HashMap<>();
+        this.Tick = 0;
+    }
+
+    public void setTick(int tick) {
+        this.Tick = tick;
+    }
+    public int getTick() {return this.Tick;}
+
+    /**
+     * Updates the robot's pose and returns the updated pose.
+     *
+     * @param newPose The new pose to update.
+     * @return The updated pose.
+     */
+    public Pose updatePose(Pose newPose) {
+        this.currentPose = newPose;
+        return currentPose;
+    }
+
+    public void doMapping(List<TrackedObject> trackedObjects) {
+        for (TrackedObject obj : trackedObjects) {
+            String id = obj.getId();
+
+            // Convert coordinates to global system
+            List<CloudPoint> globalPoints = convertToGlobal(obj.getCoordinate(), currentPose);
+
+            if (landmarks.containsKey(id)) {
+                // Update existing landmark
+                LandMark existingLandmark = landmarks.get(id);
+                existingLandmark.UpdateCoordinates(globalPoints);
+            } else {
+                // Add new landmark
+                LandMark newLandmark = new LandMark(id, obj.getDescription(), globalPoints);
+                landmarks.put(id, newLandmark);
+            }
+        }
     }
 
     /**
-     * @return The list of all landmarks in the global map.
+     * Converts local LiDAR coordinates to the global coordinate system.
      */
-    public List<LandMark> getLandmarks() {
-        return landmarks;
+    private List<CloudPoint> convertToGlobal(List<CloudPoint> localPoints, Pose pose) {
+        List<CloudPoint> globalPoints = new ArrayList<>();
+
+        for (CloudPoint point : localPoints) {
+            float globalX = point.getX() + pose.getX();
+            float globalY = point.getY() + pose.getY();
+            float globalZ = point.getZ() + point.getZ();
+            globalPoints.add(new CloudPoint(globalX, globalY,globalZ));
+        }
+        return globalPoints;
     }
 
 
-    /**
-     * @return The pose history of the robot.
-     */
-    public List<Pose> getPoseHistory() {
-        return poses;
-    }
+
+
 
 }
+

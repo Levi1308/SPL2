@@ -53,6 +53,17 @@ public class CameraService extends MicroService {
             this.camera.setTick(tickBroadcast.getTick());
             sendDetectObjectsEvents();
         });
+
+        subscribeBroadcast(TerminatedBroadcast.class, terminated -> {
+            terminate();
+        });
+
+        subscribeBroadcast(CrashedBroadcast.class, crash -> {
+            if (crash.getSensorType().equals("Camera") && crash.getSensorId().equals(camera.getId())) {
+                terminate();
+            }
+        });
+
     }
 
     /**

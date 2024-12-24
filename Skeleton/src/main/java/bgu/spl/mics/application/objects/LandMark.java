@@ -11,12 +11,12 @@ public class LandMark {
    private String id;
    private String description;
    private List<CloudPoint> coordinates;
-   public LandMark(String id,String description,CloudPoint point)
+
+   public LandMark(String id,String description,List<CloudPoint>location)
    {
       this.id=id;
       this.description=description;
-      coordinates=new ArrayList<>();
-      coordinates.add(point);
+      this.coordinates= location;
    }
    public LandMark(TrackedObject object)
    {
@@ -24,6 +24,7 @@ public class LandMark {
       this.description= object.getDescription();
       coordinates=new ArrayList<>(object.getCoordinate());
    }
+
    public String getId() {
       return id;
    }
@@ -35,6 +36,7 @@ public class LandMark {
    public List<CloudPoint> getCoordinates() {
       return coordinates;
    }
+
    public void UpdateCoordinates(List<CloudPoint> points){
       double sumx=0,sumy=0,sumz=0;
       for(CloudPoint cp:coordinates){

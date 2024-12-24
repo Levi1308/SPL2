@@ -3,6 +3,8 @@ package bgu.spl.mics.application;
 
 import bgu.spl.mics.application.objects.Camera;
 import bgu.spl.mics.application.objects.DetectedObject;
+import bgu.spl.mics.application.objects.LiDarWorkerTracker;
+import bgu.spl.mics.application.services.LiDarService;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,7 +31,7 @@ public class GurionRockRunner {
      * @param args Command-line arguments. The first argument is expected to be the path to the configuration file.
      */
     public static void main(String[] args) {
-
+        LiDarService s=new LiDarService(new LiDarWorkerTracker(1,4));
 
         // TODO: Parse configuration file.
         // TODO: Initialize system components and services.

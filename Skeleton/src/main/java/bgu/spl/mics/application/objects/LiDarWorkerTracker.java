@@ -41,10 +41,12 @@ public class LiDarWorkerTracker {
     public void setFrequency(int frequency) {
         this.frequency = frequency;
     }
-    //public void onDetectObjectsEvent(DetectObjectsEvent event) {
-    //}
+    public void onDetectObjectsEvent(int currentTime,List<DetectedObject> detectedObjectList) {
+
+    }
     private void processLiDARData(List<StampedCloudPoints> cloudPoints) {
     }
+
     private void sendTrackedObjectsEvent() {
 
     }

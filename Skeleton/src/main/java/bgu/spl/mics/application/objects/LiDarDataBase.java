@@ -1,61 +1,85 @@
 package bgu.spl.mics.application.objects;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * LiDarDataBase is a singleton class responsible for managing LiDAR data.
  * It provides access to cloud point data and other relevant information for tracked objects.
  */
 public class LiDarDataBase {
-    private final Map<Integer, List<StampedCloudPoints>> cloudPointsMap;
-    private static LiDarDataBase instance = null;
-    /*
-     * Returns the singleton instance of LiDarDataBase.
-     *
-     * @param filePath The path to the LiDAR data file.
-     * @return The singleton instance of LiDarDataBase.
-     */
-    private LiDarDataBase(){cloudPointsMap = new HashMap<>();}
+    private class LidarDataBaseHolder{
+        private static LiDarDataBase instance = new LiDarDataBase();
+    }
 
-    /**
-     * Returns the singleton instance of LiDarDataBase.
-     *
-     * @return The singleton instance of LiDarDataBase.
-     */
+    ConcurrentHashMap<Integer, StampedCloudPoints> cloudPointsMap;
+    ConcurrentHashMap<Integer, StampedDetectedObjects> stampedDetectedObjectsMap;
+
+    private LiDarDataBase(){
+        cloudPointsMap = new ConcurrentHashMap<>();
+        stampedDetectedObjectsMap=new ConcurrentHashMap<>();
+        loadData();
+    }
+
     public static synchronized LiDarDataBase getInstance() {
-        if (instance == null) {
-            instance = new LiDarDataBase();
+        return LidarDataBaseHolder.instance;
+    }
+
+    public void addNewDetectedObjects(List<DetectedObject> listObject,int currentTime){
+        StampedDetectedObjects stampedDetectObj=stampedDetectedObjectsMap.getOrDefault(currentTime,null);
+        if(stampedDetectObj==null){
+            stampedDetectObj=new StampedDetectedObjects(currentTime,listObject);
+            stampedDetectedObjectsMap.put(currentTime,stampedDetectObj);
         }
-        return instance;
+        else
+            stampedDetectObj.AddDetectedObject(listObject);
     }
 
-    /**
-     * Adds stamped cloud points to the database.
-     *
-     * @param newPoint The stamped cloud point to add.
-     */
-    public void addStampedCloudPoints(StampedCloudPoints newPoint) {
-        int tick = newPoint.getTime();
-        cloudPointsMap.computeIfAbsent(tick, k -> new ArrayList<>()).add(newPoint);
-    }
+    public void loadData() {
+        try (BufferedReader reader = new BufferedReader(new FileReader("example input/lidar_data.json"))) {
+            Gson gson = new Gson();
+            StringBuilder jsonBuilder = new StringBuilder();
 
-    /**
-     * Retrieves all cloud points for a specific tick.
-     *
-     * @param tick The tick time to retrieve cloud points for.
-     * @return List of stamped cloud points at the specified tick, or an empty list if none exist.
-     */
-    public List<StampedCloudPoints> getCloudPointsByTick(int tick) {
-        return cloudPointsMap.getOrDefault(tick, Collections.emptyList());
-    }
+            // Read the JSON file line-by-line
+            String line;
+            while ((line = reader.readLine()) != null) {
+                jsonBuilder.append(line.trim());
+            }
 
-    /**
-     * Retrieves all cloud points.
-     *
-     * @return A collection of all stamped cloud points.
-     */
-    public Collection<List<StampedCloudPoints>> getAllCloudPoints() {
-        return cloudPointsMap.values();
-    }
+            // Parse the full JSON string into a JsonArray
+            JsonArray jsonArray = gson.fromJson(jsonBuilder.toString(), JsonArray.class);
+            List<CloudPoint> cloudPointslist = new ArrayList<>();
+            // Process each JSON object in the array
+            for (JsonElement element : jsonArray) {
+                JsonObject jsonObject = element.getAsJsonObject();
+                // Extract components
+                int time = jsonObject.get("time").getAsInt();
+                String id = jsonObject.get("id").getAsString();
+                JsonArray cloudPointsArray = jsonObject.get("cloudPoints").getAsJsonArray();
 
+                for (JsonElement j : cloudPointsArray) {
+                    CloudPoint c = new CloudPoint(cloudPointsArray.get(0).getAsInt(), cloudPointsArray.get(1).getAsInt(), cloudPointsArray.get(2).getAsInt());
+                    cloudPointslist.add(c);
+                }
+                StampedCloudPoints temp = cloudPointsMap.getOrDefault(time, null);
+                if (temp == null) {
+                    temp = new StampedCloudPoints(id, time);
+                    temp.AddCloudPoint(cloudPointslist);
+                    cloudPointsMap.put(time,temp);
+                } else
+                    temp.AddCloudPoint(cloudPointslist);
+            }
+        }  catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
+

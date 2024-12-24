@@ -26,14 +26,13 @@ import java.util.concurrent.ConcurrentSkipListSet;
 
 public class LiDarService extends MicroService {
     private LiDarWorkerTracker liDarTracker;
-    ConcurrentHashMap<Integer, StampedCloudPoints> stampedCloudPoints;
+    private LiDarDataBase database;
 
     //LiDarWorkerTracker liDarWorkerTracker
     public LiDarService(LiDarWorkerTracker liDarTracker) {
         super("LidarWorkerService");
         this.liDarTracker = liDarTracker;
-        stampedCloudPoints = new ConcurrentHashMap<>();
-        loadData();
+        database=LiDarDataBase.getInstance();
     }
 
     @Override
@@ -50,52 +49,22 @@ public class LiDarService extends MicroService {
             //int currentTick = broadcast.getTick();
             //handleTick(currentTick);
         });
-        subscribeEvent(DetectObjectsEvent.class, (DetectObjectsEvent broadcast) -> {
-            //int currentTick = broadcast.getTick();
-            //handleTick(currentTick);
+        subscribeEvent(DetectObjectsEvent.class, (DetectObjectsEvent event) -> {
+            onDetectedObject(event.getTime(),event.getDetectedObjects());
         });
     }
 
-    public void onTick(int currentTick){ .
+    public void onTick(int currentTick){
 
     }
+    public void onTerminate(){
 
-    public void loadData() {
-        try (BufferedReader reader = new BufferedReader(new FileReader("example input/lidar_data.json"))) {
-            Gson gson = new Gson();
-            StringBuilder jsonBuilder = new StringBuilder();
-
-            // Read the JSON file line-by-line
-            String line;
-            while ((line = reader.readLine()) != null) {
-                jsonBuilder.append(line.trim());
-            }
-
-            // Parse the full JSON string into a JsonArray
-            JsonArray jsonArray = gson.fromJson(jsonBuilder.toString(), JsonArray.class);
-            List<CloudPoint> cloudPointslist = new ArrayList<>();
-            // Process each JSON object in the array
-            for (JsonElement element : jsonArray) {
-                JsonObject jsonObject = element.getAsJsonObject();
-                // Extract components
-                int time = jsonObject.get("time").getAsInt();
-                String id = jsonObject.get("id").getAsString();
-                JsonArray cloudPointsArray = jsonObject.get("cloudPoints").getAsJsonArray();
-                for (JsonElement j : cloudPointsArray) {
-                    CloudPoint c = new CloudPoint(cloudPointsArray.get(0).getAsInt(), cloudPointsArray.get(1).getAsInt(), cloudPointsArray.get(2).getAsInt());
-                    cloudPointslist.add(c);
-                }
-                StampedCloudPoints temp = stampedCloudPoints.getOrDefault(time, null);
-                if (temp == null) {
-                    temp = new StampedCloudPoints(id, time);
-                    temp.AddCloudPoint(cloudPointslist);
-                } else
-                    temp.AddCloudPoint(cloudPointslist);
-                stampedCloudPoints.put(time,temp);
-
-            }
-        }  catch (IOException e) {
-            throw new RuntimeException(e);
-        }
     }
+    public void onCrash(){
+
+    }
+    public void onDetectedObject(int currentTick,List<DetectedObject> detectedObjectList){
+        liDarTracker.onDetectObjectsEvent(currentTick,detectedObjectList);
+    }
+
 }

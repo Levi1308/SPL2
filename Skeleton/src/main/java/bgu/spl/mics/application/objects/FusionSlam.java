@@ -13,8 +13,9 @@ import java.util.Map;
 public class FusionSlam {
     private Pose currentPose;
     private Map<String, LandMark> landmarks;
-    private Map<String,TrackedObject> trackedObjects;
+    private List<Pose> Poses;
     private int Tick;
+    private StatisticalFolder statisticalFolder = StatisticalFolder.getInstance();
 
 
     /**
@@ -24,7 +25,7 @@ public class FusionSlam {
     public FusionSlam() {
         this.currentPose = new Pose(0, 0, 0,0);
         this.landmarks =  new HashMap<>();
-        this.trackedObjects = new HashMap<>();
+        this.Poses = new ArrayList<>();
         this.Tick = 0;
     }
 
@@ -33,15 +34,16 @@ public class FusionSlam {
     }
     public int getTick() {return this.Tick;}
 
-    /**
-     * Updates the robot's pose and returns the updated pose.
-     *
-     * @param newPose The new pose to update.
-     * @return The updated pose.
-     */
-    public Pose updatePose(Pose newPose) {
-        this.currentPose = newPose;
-        return currentPose;
+    public Pose getCurrentPose() {return this.currentPose;}
+
+    public Map<String, LandMark> getLandmarks() {return this.landmarks;}
+
+    public List<Pose> getPoses() {return this.Poses;}
+
+    public Pose addPose(Pose pose) {
+        this.Poses.add(pose);
+        this.currentPose = pose;
+        return pose;
     }
 
     public void doMapping(List<TrackedObject> trackedObjects) {
@@ -59,6 +61,7 @@ public class FusionSlam {
                 // Add new landmark
                 LandMark newLandmark = new LandMark(id, obj.getDescription(), globalPoints);
                 landmarks.put(id, newLandmark);
+                statisticalFolder.incrementLandmarks(1);
             }
         }
     }

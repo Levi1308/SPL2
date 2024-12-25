@@ -1,10 +1,8 @@
 package bgu.spl.mics.application.services;
 
+import bgu.spl.mics.Event;
 import bgu.spl.mics.MicroService;
-import bgu.spl.mics.application.messages.CrashedBroadcast;
-import bgu.spl.mics.application.messages.DetectObjectsEvent;
-import bgu.spl.mics.application.messages.TerminatedBroadcast;
-import bgu.spl.mics.application.messages.TickBroadcast;
+import bgu.spl.mics.application.messages.*;
 import bgu.spl.mics.application.objects.*;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -42,8 +40,7 @@ public class LiDarService extends MicroService {
             onTick(currentTick);
         });
         subscribeBroadcast(TerminatedBroadcast.class, (TerminatedBroadcast broadcast) -> {
-            //int currentTick = broadcast.getTick();
-            //handleTick(currentTick);
+            onTerminate();
         });
         subscribeBroadcast(CrashedBroadcast.class, (CrashedBroadcast broadcast) -> {
             //int currentTick = broadcast.getTick();
@@ -55,16 +52,32 @@ public class LiDarService extends MicroService {
     }
 
     public void onTick(int currentTick){
-
+        sendEvent(new TrackedObjectsEvent(liDarTracker.onTick(currentTick));
     }
-    public void onTerminate(){
 
+    public void onTerminate(){
+        if(liDarTracker.getLastTrackedobjects().isEmpty())
+            sendBroadcast(new TerminatedBroadcast("LidarService"));
     }
     public void onCrash(){
-
+        //if() need to shut down
     }
-    public void onDetectedObject(int currentTick,List<DetectedObject> detectedObjectList){
-        liDarTracker.onDetectObjectsEvent(currentTick,detectedObjectList);
+
+    public void onDetectedObject(int currentTime, List<DetectedObject> detectedObjectList){
+        for (DetectedObject object: detectedObjectList)
+        {
+            if(object.getId()!="ERROR") {
+                List<List<Double>> doublePoints = database.RetriveCloudPoints(object);
+                List<CloudPoint> cloudPoints = new ArrayList<>();
+                for (List<Double> list : doublePoints)
+                    cloudPoints.add(new CloudPoint(list.get(0), list.get(1), list.get(2)));
+                TrackedObject trackedObject = new TrackedObject(object.getId(), currentTime, object.getDescription(), cloudPoints);
+                liDarTracker.addTrackedObject(trackedObject);
+            }
+            else
+                //sendBroadcast(new CrashedBroadcast("Lidar",liDarTracker.getId(),"dsa"));
+        }
+
     }
 
 }

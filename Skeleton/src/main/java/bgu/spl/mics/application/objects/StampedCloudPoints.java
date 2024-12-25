@@ -10,7 +10,7 @@ import java.util.List;
 public class StampedCloudPoints {
     private String id;
     private int time;
-    private List<List<CloudPoint>> cloudPoints;
+    private List<List<Double>> cloudPoints;
 
 
     public StampedCloudPoints(String id,int time) {
@@ -27,10 +27,10 @@ public class StampedCloudPoints {
         return id;
     }
 
-    public List<List<CloudPoint>> getCloudPoints() {
+    public List<List<Double>> getCloudPoints() {
         return cloudPoints;
     }
-    public void AddCloudPoint(List<CloudPoint> listpoints)
+    public void AddCloudPoint(List<Double> listpoints)
     {
         cloudPoints.add(listpoints);
     }

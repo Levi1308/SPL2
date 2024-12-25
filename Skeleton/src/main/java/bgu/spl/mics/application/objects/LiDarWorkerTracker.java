@@ -41,13 +41,29 @@ public class LiDarWorkerTracker {
     public void setFrequency(int frequency) {
         this.frequency = frequency;
     }
-    public void onDetectObjectsEvent(int currentTime,List<DetectedObject> detectedObjectList) {
-
+    public List<TrackedObject> onTick(int currentTick) {
+        List<TrackedObject> lidarlist=getLastTrackedobjects();
+        List<TrackedObject> allTrackedObj=new ArrayList<>();
+        int frequency= getFrequency();
+        for(TrackedObject obj:lidarlist){
+            if(obj.getTime()+frequency==currentTick){
+                allTrackedObj.add(obj);
+            }
+        }
+        return allTrackedObj;
+    }
+    public void addTrackedObject(TrackedObject obj){
+        lastTrackedobjects.add(obj);
+        //במידה וגיליתי עצם חדש שכבר גיליתי אותו
+        /*for(TrackedObject trackedObject:lastTrackedobjects)
+        {
+            if(trackedObject.getId()==obj.getId())
+                trackedObject.
+        }*/
     }
     private void processLiDARData(List<StampedCloudPoints> cloudPoints) {
-    }
-
-    private void sendTrackedObjectsEvent() {
 
     }
+
+
 }

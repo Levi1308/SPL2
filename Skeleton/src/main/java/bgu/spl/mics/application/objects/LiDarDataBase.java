@@ -20,12 +20,10 @@ public class LiDarDataBase {
         private static LiDarDataBase instance = new LiDarDataBase();
     }
 
-    ConcurrentHashMap<Integer, StampedCloudPoints> cloudPointsMap;
-    ConcurrentHashMap<Integer, StampedDetectedObjects> stampedDetectedObjectsMap;
+    ConcurrentHashMap<String, StampedCloudPoints> cloudPointsMap;
 
     private LiDarDataBase(){
         cloudPointsMap = new ConcurrentHashMap<>();
-        stampedDetectedObjectsMap=new ConcurrentHashMap<>();
         loadData();
     }
 
@@ -33,15 +31,14 @@ public class LiDarDataBase {
         return LidarDataBaseHolder.instance;
     }
 
-    public void addNewDetectedObjects(List<DetectedObject> listObject,int currentTime){
-        StampedDetectedObjects stampedDetectObj=stampedDetectedObjectsMap.getOrDefault(currentTime,null);
-        if(stampedDetectObj==null){
-            stampedDetectObj=new StampedDetectedObjects(currentTime,listObject);
-            stampedDetectedObjectsMap.put(currentTime,stampedDetectObj);
-        }
-        else
-            stampedDetectObj.AddDetectedObject(listObject);
+    public List<List<Double>> RetriveCloudPoints(DetectedObject object){
+        StampedCloudPoints s=cloudPointsMap.getOrDefault(object.getId(),null);
+        if(s!=null)
+            return s.getCloudPoints();
+        return null;
     }
+
+
 
     public void loadData() {
         try (BufferedReader reader = new BufferedReader(new FileReader("example input/lidar_data.json"))) {
@@ -56,7 +53,7 @@ public class LiDarDataBase {
 
             // Parse the full JSON string into a JsonArray
             JsonArray jsonArray = gson.fromJson(jsonBuilder.toString(), JsonArray.class);
-            List<CloudPoint> cloudPointslist = new ArrayList<>();
+            List<Double> cloudPointslist = new ArrayList<>();
             // Process each JSON object in the array
             for (JsonElement element : jsonArray) {
                 JsonObject jsonObject = element.getAsJsonObject();
@@ -66,14 +63,13 @@ public class LiDarDataBase {
                 JsonArray cloudPointsArray = jsonObject.get("cloudPoints").getAsJsonArray();
 
                 for (JsonElement j : cloudPointsArray) {
-                    CloudPoint c = new CloudPoint(cloudPointsArray.get(0).getAsInt(), cloudPointsArray.get(1).getAsInt(), cloudPointsArray.get(2).getAsInt());
-                    cloudPointslist.add(c);
+                    cloudPointslist.add(j.getAsDouble());
                 }
                 StampedCloudPoints temp = cloudPointsMap.getOrDefault(time, null);
                 if (temp == null) {
                     temp = new StampedCloudPoints(id, time);
                     temp.AddCloudPoint(cloudPointslist);
-                    cloudPointsMap.put(time,temp);
+                    cloudPointsMap.put(id,temp);
                 } else
                     temp.AddCloudPoint(cloudPointslist);
             }

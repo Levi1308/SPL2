@@ -58,6 +58,7 @@ public class LiDarService extends MicroService {
     public void onTerminate(){
         if(liDarTracker.getLastTrackedobjects().isEmpty())
             sendBroadcast(new TerminatedBroadcast("LidarService"));
+        terminate();
     }
     public void onCrash(){
         //if() need to shut down

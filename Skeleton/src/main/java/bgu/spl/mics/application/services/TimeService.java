@@ -3,6 +3,7 @@ package bgu.spl.mics.application.services;
 import bgu.spl.mics.MicroService;
 import bgu.spl.mics.application.messages.TerminatedBroadcast;
 import bgu.spl.mics.application.messages.TickBroadcast;
+import bgu.spl.mics.application.objects.StatisticalFolder;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -15,6 +16,8 @@ import java.util.concurrent.TimeUnit;
 public class TimeService extends MicroService {
      private int TickTime;
      private int Duration;
+    private StatisticalFolder statisticalFolder = StatisticalFolder.getInstance();
+
     /**
      * Constructor for TimeService.
      *
@@ -38,6 +41,7 @@ public class TimeService extends MicroService {
         scheduler.scheduleAtFixedRate(() -> {
             if (ticks[0] < Duration) {
                 sendBroadcast(new TickBroadcast(ticks[0]++));
+                statisticalFolder.incrementRuntime();
             } else {
                 sendBroadcast(new TerminatedBroadcast(getName()));
                 scheduler.shutdown();

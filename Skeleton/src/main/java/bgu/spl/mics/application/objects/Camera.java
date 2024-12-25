@@ -17,6 +17,7 @@ public class Camera {
     private List<StampedDetectedObjects> detectedObjectsList;
     private STATUS status;
     private int tick;
+    private StatisticalFolder statisticalFolder = StatisticalFolder.getInstance();
 
 
     public Camera(int id, int frequency) {
@@ -37,32 +38,11 @@ public class Camera {
         if (!detectedObjects.isEmpty()) {
             StampedDetectedObjects stamped = new StampedDetectedObjects(tick,detectedObjects);
             detectedObjectsList.add(stamped);
-            System.out.println("Camera " + id + " detected " + detectedObjects.size() + " objects at tick " + tick);
+            statisticalFolder.incrementDetectedObjects(1);
+
         }
     }
-/*
-    public void DetectObjects(DetectedObject object, int time) {
-        List<DetectedObject> tempObjects = getDetectedObjectsList(time);
-        if (tempObjects != null) {
-            if (!tempObjects.contains(object)) {
-                List<DetectedObject> newStampObj = getDetectedObjectsList(time + frequency);
-                if (newStampObj != null)
-                    newStampObj.add(object);
-                else {
-                    StampedDetectedObjects newObj = new StampedDetectedObjects(time + frequency);
-                    newObj.AddDetectedObject(object);
-                    detectedObjectsList.add(newObj);
-                }
-            }
 
-        } else {
-            StampedDetectedObjects newObj = new StampedDetectedObjects(time + frequency);
-            newObj.AddDetectedObject(object);
-            detectedObjectsList.add(newObj);
-        }
-
-    }
-*/
     public void handleError(){
         this.status = STATUS.ERROR;
     }

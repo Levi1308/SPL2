@@ -31,6 +31,7 @@ import java.util.List;
 public class CameraService extends MicroService {
     private final Camera camera;
     private int lastEventTick;
+
     /**
      * Constructor for CameraService.
      *
@@ -88,23 +89,9 @@ public class CameraService extends MicroService {
      * @return List of detected objects.
      */
     private List<DetectedObject> readDetectedObjectsFromJSON(int tick) {
-        List<DetectedObject> detectedObjects = new ArrayList<>();
-        try (FileReader reader = new FileReader("example_input_2/camera_data.json")) {
-            Gson gson = new Gson();
-            Type type = new TypeToken<List<StampedDetectedObjects>>() {}.getType();
-            List<StampedDetectedObjects> stampedList = gson.fromJson(reader, type);
-
-
-            for (StampedDetectedObjects stamped : stampedList) {
-                if (stamped.getTime() == tick) {
-                    detectedObjects.addAll(stamped.getDetectedObjects());
-                }
-            }
-        } catch (IOException e) {
-            System.err.println("Error reading camera data at tick: " + tick);
-            e.printStackTrace();
-        }
-        return detectedObjects;
+       //
+        //return detectedObjects;
+        return null;
     }
 
     private void handleError() {

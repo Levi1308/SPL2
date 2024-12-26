@@ -52,7 +52,7 @@ public class LiDarService extends MicroService {
     }
 
     public void onTick(int currentTick){
-        sendEvent(new TrackedObjectsEvent(liDarTracker.onTick(currentTick));
+        sendEvent(new TrackedObjectsEvent(liDarTracker.onTick(currentTick)));
     }
 
     public void onTerminate(){
@@ -75,7 +75,7 @@ public class LiDarService extends MicroService {
                 TrackedObject trackedObject = new TrackedObject(object.getId(), currentTime, object.getDescription(), cloudPoints);
                 liDarTracker.addTrackedObject(trackedObject);
             }
-            else
+            //else
                 //sendBroadcast(new CrashedBroadcast("Lidar",liDarTracker.getId(),"dsa"));
         }
 

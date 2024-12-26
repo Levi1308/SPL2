@@ -24,7 +24,6 @@ public class LiDarDataBase {
 
     private LiDarDataBase(){
         cloudPointsMap = new ConcurrentHashMap<>();
-        loadData();
     }
 
     public static synchronized LiDarDataBase getInstance() {
@@ -40,8 +39,8 @@ public class LiDarDataBase {
 
 
 
-    public void loadData() {
-        try (BufferedReader reader = new BufferedReader(new FileReader("example input/lidar_data.json"))) {
+    public void loadData(String path) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(path))) {
             Gson gson = new Gson();
             StringBuilder jsonBuilder = new StringBuilder();
 

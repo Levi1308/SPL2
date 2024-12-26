@@ -61,6 +61,10 @@ public class Camera {
         return frequency;
     }
 
+    public void setDetectedObjectsList(List<StampedDetectedObjects> detectedObjectsList) {
+        this.detectedObjectsList = detectedObjectsList;
+    }
+
     public List<StampedDetectedObjects> getStampedDetectedObjectsList() {
         return detectedObjectsList;
     }

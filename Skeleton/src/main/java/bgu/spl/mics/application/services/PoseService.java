@@ -34,7 +34,10 @@ public class PoseService extends MicroService {
         super("PoseService");
         this.gpsimu=gpsimu;
         poses=new ArrayList<>();
-        loadData();
+    }
+
+    public void setPoses(List<Pose> poses) {
+        this.poses = poses;
     }
 
     @Override
@@ -60,34 +63,5 @@ public class PoseService extends MicroService {
             //finish with all th poses;
         }
     }
-    public void loadData() {
-            try (BufferedReader reader = new BufferedReader(new FileReader("example input/lidar_data.json"))) {
-                Gson gson = new Gson();
-                StringBuilder jsonBuilder = new StringBuilder();
 
-                // Read the JSON file line-by-line
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    jsonBuilder.append(line.trim());
-                }
-
-                // Parse the full JSON string into a JsonArray
-                JsonArray jsonArray = gson.fromJson(jsonBuilder.toString(), JsonArray.class);
-                List<CloudPoint> cloudPointslist = new ArrayList<>();
-                // Process each JSON object in the array
-                for (JsonElement element : jsonArray) {
-                    JsonObject jsonObject = element.getAsJsonObject();
-                    // Extract components
-                    int time = jsonObject.get("time").getAsInt();
-                    int x = jsonObject.get("x").getAsInt();
-                    int y = jsonObject.get("y").getAsInt();
-                    int yaw = jsonObject.get("yaw").getAsInt();
-                    Pose p=new Pose(x,y,yaw,time);
-                    poses.add(p);
-
-                }
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
     }

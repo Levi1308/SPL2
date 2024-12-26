@@ -18,6 +18,7 @@ public class ReaderJsonPose {
     String path;
     ReaderJsonPose(String path){
         this.path=path;
+        poses=new ArrayList<>();
         loadData();
     }
     public void loadData() {

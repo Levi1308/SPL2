@@ -52,7 +52,7 @@ public class LiDarDataBase {
 
             // Parse the full JSON string into a JsonArray
             JsonArray jsonArray = gson.fromJson(jsonBuilder.toString(), JsonArray.class);
-            List<Double> cloudPointslist = new ArrayList<>();
+            List<List<Double>> cloudPointslist = new ArrayList<>();
             // Process each JSON object in the array
             for (JsonElement element : jsonArray) {
                 JsonObject jsonObject = element.getAsJsonObject();
@@ -61,9 +61,18 @@ public class LiDarDataBase {
                 String id = jsonObject.get("id").getAsString();
                 JsonArray cloudPointsArray = jsonObject.get("cloudPoints").getAsJsonArray();
 
-                for (JsonElement j : cloudPointsArray) {
-                    cloudPointslist.add(j.getAsDouble());
+                for (JsonElement cloudPoint : cloudPointsArray) {
+                    JsonArray point = cloudPoint.getAsJsonArray();
+                    double x = point.get(0).getAsDouble();
+                    double y = point.get(1).getAsDouble();
+                    double z = point.get(2).getAsDouble();
+                    List<Double> doubleList=new ArrayList<>();
+                    doubleList.add(x);
+                    doubleList.add(y);
+                    doubleList.add(z);
+                    cloudPointslist.add(doubleList);
                 }
+
                 StampedCloudPoints temp = cloudPointsMap.getOrDefault(time, null);
                 if (temp == null) {
                     temp = new StampedCloudPoints(id, time);

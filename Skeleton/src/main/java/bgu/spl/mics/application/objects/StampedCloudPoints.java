@@ -30,8 +30,10 @@ public class StampedCloudPoints {
     public List<List<Double>> getCloudPoints() {
         return cloudPoints;
     }
-    public void AddCloudPoint(List<Double> listpoints)
+    public void AddCloudPoint(List<List<Double>> listpoints)
     {
-        cloudPoints.add(listpoints);
+        for(List<Double> l:listpoints) {
+            cloudPoints.add(l);
+        }
     }
 }

@@ -52,6 +52,8 @@ public class GurionRockRunner {
             while ((line = reader.readLine()) != null) {
                 jsonBuilder.append(line.trim());
             }
+            File file = new File(configFile);
+            String parentDir = file.getParent();
 
             // Parse the full JSON string into a JsonObject
             JsonObject configObject = gson.fromJson(jsonBuilder.toString(), JsonObject.class);
@@ -60,7 +62,9 @@ public class GurionRockRunner {
             JsonObject cameras = configObject.getAsJsonObject("Cameras");
             JsonArray camerasConfigurations = cameras.getAsJsonArray("CamerasConfigurations");
             String cameraDataPath = cameras.get("camera_datas_path").getAsString();
-            ReaderJsonCamera readerCamera=new ReaderJsonCamera(cameraDataPath);
+            String path=parentDir.concat(cameraDataPath);
+            path=path.replaceFirst("[.]","");
+            ReaderJsonCamera readerCamera=new ReaderJsonCamera(path);
 
             // Iterate through the CameraConfigurations array
             for (JsonElement cameraElement : camerasConfigurations) {
@@ -82,8 +86,10 @@ public class GurionRockRunner {
             JsonObject lidarWorkers = configObject.getAsJsonObject("LidarWorkers");
             JsonArray lidarConfigurations = lidarWorkers.getAsJsonArray("LidarConfigurations");
             String lidarDataPath = lidarWorkers.get("lidars_data_path").getAsString();
+            path=parentDir.concat(lidarDataPath);
+            path=path.replaceFirst("[.]","");
             LiDarDataBase liDarDataBase=LiDarDataBase.getInstance();
-            liDarDataBase.loadData(lidarDataPath);
+            liDarDataBase.loadData(path);
 
             // Iterate through the LidarConfigurations array
             for (JsonElement lidarElement : lidarConfigurations) {
@@ -99,7 +105,10 @@ public class GurionRockRunner {
             }
 
             String poseJsonFile = configObject.get("poseJsonFile").getAsString();
-            ReaderJsonPose readerJsonPose=new ReaderJsonPose(poseJsonFile);
+            path=parentDir.concat(poseJsonFile);
+            path=path.replaceFirst("[.]","");
+            ReaderJsonPose readerJsonPose=new ReaderJsonPose(path);
+
             PoseService poseService=new PoseService(new GPSIMU());
             poseService.setPoses(readerJsonPose.getPoses());
 

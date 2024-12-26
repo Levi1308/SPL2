@@ -19,12 +19,13 @@ import java.util.Map;
 
 public class ReaderJsonCamera {
     String path;
-    Map<Integer ,StampedDetectedObjects> temp;
+    Map<Integer, StampedDetectedObjects> temp;
     List<StampedDetectedObjects> stampedDetectedObjects;
+
     public ReaderJsonCamera(String path) {
         this.path = path;
-        temp=new HashMap<>();
-        stampedDetectedObjects=new ArrayList<>();
+        temp = new HashMap<>();
+        stampedDetectedObjects = new ArrayList<>();
         loadData();
     }
 
@@ -42,29 +43,31 @@ public class ReaderJsonCamera {
             // Parse the JSON into a JsonObject
             JsonObject cameraData = gson.fromJson(jsonBuilder.toString(), JsonObject.class);
 
-            for (JsonElement entryElement : cameraData.getAsJsonArray()) {
-                JsonObject entry = entryElement.getAsJsonObject();
-                int time = entry.get("time").getAsInt();
-                JsonArray detectedObjects = entry.getAsJsonArray("detectedObjects");
-                List<DetectedObject> detectedObjectList=new ArrayList<>();
-                for (JsonElement objectElement : detectedObjects) {
-                    JsonObject detectedObject = objectElement.getAsJsonObject();
-                    String id = detectedObject.get("id").getAsString();
-                    String description = detectedObject.get("description").getAsString();
-                    DetectedObject obj=new DetectedObject(id,description);
-                    detectedObjectList.add(obj);
+            for (Map.Entry<String, JsonElement> cameraEntry : cameraData.entrySet()) {
+                String cameraKey = cameraEntry.getKey();
+                JsonArray cameraEntries = cameraEntry.getValue().getAsJsonArray();
+                for (JsonElement entryElement : cameraEntries) {
+                    JsonObject entry = entryElement.getAsJsonObject();
+                    int time = entry.get("time").getAsInt();
+                    JsonArray detectedObjects = entry.getAsJsonArray("detectedObjects");
+                    List<DetectedObject> detectedObjectList = new ArrayList<>();
+                    for (JsonElement objectElement : detectedObjects) {
+                        JsonObject detectedObject = objectElement.getAsJsonObject();
+                        String id = detectedObject.get("id").getAsString();
+                        String description = detectedObject.get("description").getAsString();
+                        DetectedObject obj = new DetectedObject(id, description);
+                        detectedObjectList.add(obj);
+                    }
+                    StampedDetectedObjects stampedobj = temp.getOrDefault(time, null);
+                    if (stampedobj != null) {
+                        stampedobj.AddDetectedObject(detectedObjectList);
+                    } else {
+                        stampedobj = new StampedDetectedObjects(time, detectedObjectList);
+                        temp.put(time, stampedobj);
+                    }
                 }
-                StampedDetectedObjects stampedobj=temp.getOrDefault(time,null);
-                if(stampedobj!=null)
-                {
-                    stampedobj.AddDetectedObject(detectedObjectList);
-                }
-                else {
-                    stampedobj=new StampedDetectedObjects(time,detectedObjectList);
-                    temp.put(time,stampedobj);
-                }
+                stampedDetectedObjects.addAll(temp.values());
             }
-            stampedDetectedObjects.addAll(temp.values());
         } catch (IOException e) {
             //e.printStackTrace();
             throw new RuntimeException("Error reading the camera data file.", e);

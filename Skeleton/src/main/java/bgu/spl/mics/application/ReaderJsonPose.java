@@ -40,9 +40,9 @@ public class ReaderJsonPose {
                 JsonObject jsonObject = element.getAsJsonObject();
                 // Extract components
                 int time = jsonObject.get("time").getAsInt();
-                int x = jsonObject.get("x").getAsInt();
-                int y = jsonObject.get("y").getAsInt();
-                int yaw = jsonObject.get("yaw").getAsInt();
+                float x = jsonObject.get("x").getAsFloat();
+                float y = jsonObject.get("y").getAsFloat();
+                float yaw = jsonObject.get("yaw").getAsFloat();
                 Pose p=new Pose(x,y,yaw,time);
                 poses.add(p);
 
@@ -54,5 +54,17 @@ public class ReaderJsonPose {
 
     public List<Pose> getPoses() {
         return poses;
+    }
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("ReaderJsonPose{\n");
+        builder.append("  Poses:\n");
+        for (Pose pose : poses) {
+            builder.append(String.format("    Pose [x=%.2f, y=%.2f, yaw=%.2f, time=%d]\n",
+                    pose.getX(), pose.getY(), pose.getYaw(), pose.getTime()));
+        }
+        builder.append("}");
+        return builder.toString();
     }
 }

@@ -36,4 +36,12 @@ public class StampedCloudPoints {
             cloudPoints.add(l);
         }
     }
+    @Override
+    public String toString() {
+        return "StampedCloudPoints{" +
+                "id='" + id + '\'' +
+                ", time=" + time +
+                ", cloudPoints=" + cloudPoints +
+                '}';
+    }
 }

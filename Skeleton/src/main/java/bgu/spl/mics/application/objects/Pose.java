@@ -32,4 +32,9 @@ public class Pose {
     public float getYaw() {
         return yaw;
     }
+    @Override
+    public String toString() {
+        return String.format("Pose[x=%.2f, y=%.2f, yaw=%.2f, time=%d]", x, y, yaw, time);
+    }
+
 }

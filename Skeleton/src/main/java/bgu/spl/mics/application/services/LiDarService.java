@@ -79,10 +79,10 @@ public class LiDarService extends MicroService {
         for (DetectedObject object: detectedObjectList)
         {
             if(object.getId()!="ERROR") {
-                List<List<Double>> doublePoints = database.RetriveCloudPoints(object);
+                List<List<Double>> doublePoints = database.RetriveCloudPoints(object,currentTime);
                 List<CloudPoint> cloudPoints = new ArrayList<>();
                 for (List<Double> list : doublePoints)
-                    cloudPoints.add(new CloudPoint(list.get(0), list.get(1), list.get(2)));
+                    cloudPoints.add(new CloudPoint(list.get(0), list.get(1)));
                 TrackedObject trackedObject = new TrackedObject(object.getId(), currentTime, object.getDescription(), cloudPoints);
                 liDarTracker.addTrackedObject(trackedObject);
             }

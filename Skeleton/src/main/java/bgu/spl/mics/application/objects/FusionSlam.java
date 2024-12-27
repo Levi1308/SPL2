@@ -75,8 +75,7 @@ public class FusionSlam {
         for (CloudPoint point : localPoints) {
             Double globalX = point.getX() + pose.getX();
             Double globalY = point.getY() + pose.getY();
-            Double globalZ = point.getZ() + point.getZ();
-            globalPoints.add(new CloudPoint(globalX, globalY,globalZ));
+            globalPoints.add(new CloudPoint(globalX, globalY));
         }
         return globalPoints;
     }

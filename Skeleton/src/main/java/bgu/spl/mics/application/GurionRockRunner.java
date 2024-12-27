@@ -74,6 +74,8 @@ public class GurionRockRunner {
             path=path.replaceFirst("[.]","");
             ReaderJsonCamera readerCamera=new ReaderJsonCamera(path);
 
+            //System.out.println(readerCamera.toString());
+
             // Iterate through the CameraConfigurations array
             for (JsonElement cameraElement : camerasConfigurations) {
                 JsonObject cameraConfig = cameraElement.getAsJsonObject();
@@ -102,6 +104,8 @@ public class GurionRockRunner {
             LiDarDataBase liDarDataBase=LiDarDataBase.getInstance();
             liDarDataBase.loadData(path);
 
+            //System.out.println(liDarDataBase.toString());
+
             // Iterate through the LidarConfigurations array
             for (JsonElement lidarElement : lidarConfigurations) {
                 JsonObject lidarConfig = lidarElement.getAsJsonObject();
@@ -123,6 +127,7 @@ public class GurionRockRunner {
             path=path.replaceFirst("[.]","");
             ReaderJsonPose readerJsonPose=new ReaderJsonPose(path);
 
+            //System.out.println(readerJsonPose.toString());
             PoseService poseService=new PoseService(new GPSIMU());
             poseService.setPoses(readerJsonPose.getPoses());
 
@@ -137,6 +142,7 @@ public class GurionRockRunner {
             Thread timeThread = new Thread(timeService);
             timeThread.start();
 
+            /*
             for (Thread t : threads) {
                 try {
                     t.join();
@@ -145,18 +151,11 @@ public class GurionRockRunner {
                     e.printStackTrace();
                 }
             }
-
+            */
 
             SimulationOutput output = new SimulationOutput(StatisticalFolder.getInstance(),fusionSlamService.getFusionSlam().getLandmarks() , null);
-
             String outputPath = parentDir + File.separator + "output.json";
-
             saveOutputFile(output, outputPath);
-
-
-
-
-
         } catch (IOException e) {
             System.out.println("Reached exeption");
         }

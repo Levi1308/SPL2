@@ -10,6 +10,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 /**
  * LiDarDataBase is a singleton class responsible for managing LiDAR data.
@@ -20,20 +22,21 @@ public class LiDarDataBase {
         private static LiDarDataBase instance = new LiDarDataBase();
     }
 
-    ConcurrentHashMap<String, StampedCloudPoints> cloudPointsMap;
+    ConcurrentLinkedQueue<StampedCloudPoints> cloudPoints;
 
     private LiDarDataBase(){
-        cloudPointsMap = new ConcurrentHashMap<>();
+        cloudPoints = new ConcurrentLinkedQueue<>();
     }
 
     public static synchronized LiDarDataBase getInstance() {
         return LidarDataBaseHolder.instance;
     }
 
-    public List<List<Double>> RetriveCloudPoints(DetectedObject object){
-        StampedCloudPoints s=cloudPointsMap.getOrDefault(object.getId(),null);
-        if(s!=null)
-            return s.getCloudPoints();
+    public List<List<Double>> RetriveCloudPoints(DetectedObject object,int currentTime){
+        for(StampedCloudPoints s:cloudPoints) {
+            if (s.getId().equals(object.getId()) && s.getTime()==currentTime)
+                return s.getCloudPoints();
+        }
         return null;
     }
 
@@ -52,38 +55,49 @@ public class LiDarDataBase {
 
             // Parse the full JSON string into a JsonArray
             JsonArray jsonArray = gson.fromJson(jsonBuilder.toString(), JsonArray.class);
-            List<List<Double>> cloudPointslist = new ArrayList<>();
-            // Process each JSON object in the array
+             // Process each JSON object in the array
             for (JsonElement element : jsonArray) {
                 JsonObject jsonObject = element.getAsJsonObject();
                 // Extract components
                 int time = jsonObject.get("time").getAsInt();
                 String id = jsonObject.get("id").getAsString();
                 JsonArray cloudPointsArray = jsonObject.get("cloudPoints").getAsJsonArray();
-
-                for (JsonElement cloudPoint : cloudPointsArray) {
-                    JsonArray point = cloudPoint.getAsJsonArray();
+                List<List<Double>> cloudPointslist = new ArrayList<>();
+                for (JsonElement cPoint : cloudPointsArray) {
+                    JsonArray point = cPoint.getAsJsonArray();
                     double x = point.get(0).getAsDouble();
                     double y = point.get(1).getAsDouble();
-                    double z = point.get(2).getAsDouble();
                     List<Double> doubleList=new ArrayList<>();
                     doubleList.add(x);
                     doubleList.add(y);
-                    doubleList.add(z);
                     cloudPointslist.add(doubleList);
                 }
 
-                StampedCloudPoints temp = cloudPointsMap.getOrDefault(time, null);
-                if (temp == null) {
-                    temp = new StampedCloudPoints(id, time);
-                    temp.AddCloudPoint(cloudPointslist);
-                    cloudPointsMap.put(id,temp);
-                } else
-                    temp.AddCloudPoint(cloudPointslist);
+                StampedCloudPoints temp = new StampedCloudPoints(id, time);
+                temp.AddCloudPoint(cloudPointslist);
+                cloudPoints.add(temp);
+                cloudPointslist.clear();
+                if(cloudPoints.size()==13)
+                    cloudPoints.toString();
             }
         }  catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("LiDarDataBase{\n");
+
+        // Iterate over each StampedCloudPoints in the cloudPoints set
+        for (StampedCloudPoints cloudPoint : cloudPoints) {
+            builder.append("  id='").append(cloudPoint.getId()).append("': ")
+                    .append(cloudPoint.toString()).append("\n");
+        }
+
+        builder.append("}");
+        return builder.toString();
+    }
+
 }
 

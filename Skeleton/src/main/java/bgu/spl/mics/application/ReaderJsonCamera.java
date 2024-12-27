@@ -76,4 +76,20 @@ public class ReaderJsonCamera {
     public Map<Integer,StampedDetectedObjects> getStampedDetectedObjects() {
         return stampedDetectedObjects;
     }
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("ReaderJsonCamera{")
+                .append("path='").append(path).append('\'')
+                .append(", stampedDetectedObjects={");
+
+        for (Map.Entry<Integer, StampedDetectedObjects> entry : stampedDetectedObjects.entrySet()) {
+            builder.append("\n  Time=").append(entry.getKey())
+                    .append(": ").append(entry.getValue().toString());
+        }
+        builder.append("\n}}");
+
+        return builder.toString();
+    }
+
 }

@@ -36,7 +36,10 @@ public class FusionSlam {
 
     public Pose getCurrentPose() {return this.currentPose;}
 
-    public Map<String, LandMark> getLandmarks() {return this.landmarks;}
+    public synchronized Map<String, LandMark> getLandmarks() {
+        return new HashMap<>(this.landmarks);  // Return a copy to avoid concurrency issues
+    }
+
 
     public List<Pose> getPoses() {return this.Poses;}
 
@@ -48,23 +51,27 @@ public class FusionSlam {
 
     public void doMapping(List<TrackedObject> trackedObjects) {
         for (TrackedObject obj : trackedObjects) {
-            String id = obj.getId();
+            if (obj.getCoordinate() == null || obj.getCoordinate().isEmpty()) {
+                System.out.println("TrackedObject " + obj.getId() + " has no coordinates.");
+                continue;
+            }
 
-            // Convert coordinates to global system
+            String id = obj.getId();
             List<CloudPoint> globalPoints = convertToGlobal(obj.getCoordinate(), currentPose);
 
             if (landmarks.containsKey(id)) {
-                // Update existing landmark
+                System.out.println("Updating landmark " + id);
                 LandMark existingLandmark = landmarks.get(id);
                 existingLandmark.UpdateCoordinates(globalPoints);
             } else {
-                // Add new landmark
+                System.out.println("Adding new landmark " + id);
                 LandMark newLandmark = new LandMark(id, obj.getDescription(), globalPoints);
                 landmarks.put(id, newLandmark);
                 statisticalFolder.incrementLandmarks(1);
             }
         }
     }
+
 
     /**
      * Converts local LiDAR coordinates to the global coordinate system.
@@ -76,9 +83,12 @@ public class FusionSlam {
             Double globalX = point.getX() + pose.getX();
             Double globalY = point.getY() + pose.getY();
             globalPoints.add(new CloudPoint(globalX, globalY));
+            System.out.println("Converted point (" + point.getX() + ", " + point.getY() +
+                    ") to global point (" + globalX + ", " + globalY + ")");
         }
         return globalPoints;
     }
+
 
 
 

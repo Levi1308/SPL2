@@ -44,23 +44,33 @@ public class FusionSlamService extends MicroService {
 
 
         subscribeEvent(TrackedObjectsEvent.class, event -> {
-            fusionSlam.doMapping(event.getTrackedObjects());
+            List<TrackedObject> trackedObjects = event.getTrackedObjects();
+            if (trackedObjects == null || trackedObjects.isEmpty()) {
+                System.out.println("No tracked objects received at tick " + fusionSlam.getTick());
+                return;
+            }
+            fusionSlam.doMapping(trackedObjects);
         });
 
+
         subscribeEvent(PoseEvent.class, event -> {
-            Pose updatedPose = fusionSlam.addPose(event.getPose());;
+            Pose updatedPose = fusionSlam.addPose(event.getPose());
+            System.out.println("Pose updated to: " + updatedPose.getX() + ", " + updatedPose.getY());
             complete(event, updatedPose);
         });
 
 
+
         subscribeBroadcast(TerminatedBroadcast.class, terminated -> {
+            System.out.println("FusionSlamService received termination signal. Shutting down.");
             terminate();
         });
-
 
         subscribeBroadcast(CrashedBroadcast.class, crash -> {
+            System.out.println("FusionSlamService received crash broadcast. Shutting down.");
             terminate();
         });
+
 
     }
 

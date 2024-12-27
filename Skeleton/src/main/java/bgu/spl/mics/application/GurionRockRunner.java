@@ -142,7 +142,7 @@ public class GurionRockRunner {
             Thread timeThread = new Thread(timeService);
             timeThread.start();
 
-            /*
+
             for (Thread t : threads) {
                 try {
                     t.join();
@@ -151,7 +151,7 @@ public class GurionRockRunner {
                     e.printStackTrace();
                 }
             }
-            */
+
 
             SimulationOutput output = new SimulationOutput(StatisticalFolder.getInstance(),fusionSlamService.getFusionSlam().getLandmarks() , null);
             String outputPath = parentDir + File.separator + "output.json";

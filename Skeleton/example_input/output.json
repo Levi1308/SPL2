@@ -1,8 +1,8 @@
 {
   "statistics": {
-    "systemRuntime": 0,
-    "numTrackedObjects": 0,
-    "numDetectedObjects": 0,
+    "systemRuntime": 30,
+    "numTrackedObjects": 13,
+    "numDetectedObjects": 13,
     "numLandmarks": 0
   },
   "landmarks": {}

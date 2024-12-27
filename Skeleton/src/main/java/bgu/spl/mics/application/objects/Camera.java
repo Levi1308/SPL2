@@ -72,7 +72,11 @@ public class Camera {
     }
 
     public List<DetectedObject> getDetectedObjects(int tick) {
-        return detectedObjectsMap.get(tick).getDetectedObjects();
+        StampedDetectedObjects stampedObjects = detectedObjectsMap.get(tick);
+        if (stampedObjects == null) {
+            return new ArrayList<>();
+        }
+        return stampedObjects.getDetectedObjects();
     }
 
 

@@ -46,6 +46,7 @@ public class GurionRockRunner {
             System.out.println("Please provide the config file path.");
             return;
         }
+        List<Thread> threads = new ArrayList<>();
         List<Camera> cameraList=new ArrayList<>();
         List<LiDarWorkerTracker> liDarWorkerTrackerList=new ArrayList<>();
 
@@ -87,6 +88,7 @@ public class GurionRockRunner {
             for(Camera c: cameraList) {
                 CameraService cameraService = new CameraService(c);
                 Thread cameraThread = new Thread(cameraService);
+                threads.add(cameraThread);
                 cameraThread.start();
             }
 
@@ -112,6 +114,7 @@ public class GurionRockRunner {
             {
                 LiDarService lidarService = new LiDarService(lidar);
                 Thread lidarThread = new Thread(lidarService);
+                threads.add(lidarThread);
                 lidarThread.start();
             }
 
@@ -134,6 +137,15 @@ public class GurionRockRunner {
             Thread timeThread = new Thread(timeService);
             timeThread.start();
 
+            for (Thread t : threads) {
+                try {
+                    t.join();
+                    System.out.println(t.getName() + " has finished.");
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+
 
             SimulationOutput output = new SimulationOutput(StatisticalFolder.getInstance(),fusionSlamService.getFusionSlam().getLandmarks() , null);
 
@@ -146,7 +158,7 @@ public class GurionRockRunner {
 
 
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("Reached exeption");
         }
 
     }

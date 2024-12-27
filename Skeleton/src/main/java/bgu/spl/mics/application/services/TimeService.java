@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static bgu.spl.mics.application.GurionRockRunner.saveOutputFile;
 
@@ -44,25 +45,30 @@ public class TimeService extends MicroService {
      */
     @Override
     protected void initialize() {
-        int[] ticks = {0};
+        AtomicInteger ticks = new AtomicInteger(0);
         ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+
         scheduler.scheduleAtFixedRate(() -> {
-            if (ticks[0] < Duration) {
-                sendBroadcast(new TickBroadcast(ticks[0]++));
+            if (ticks.get() < Duration) {
+                sendBroadcast(new TickBroadcast(ticks.getAndIncrement()));
+                System.out.println("Tick " + ticks.get() + " broadcasted.");
                 statisticalFolder.incrementRuntime();
             } else {
                 sendBroadcast(new TerminatedBroadcast(getName()));
+                System.out.println("Simulation ended at tick " + ticks.get());
                 scheduler.shutdown();
                 terminate();
             }
         }, 0, TickTime, TimeUnit.MILLISECONDS);
+
+
         subscribeBroadcast(CrashedBroadcast.class, crash -> {
             System.out.println("Simulation stopping due to sensor failure: " + crash.getError());
             generateErrorOutputFile(crash.getError(), crash.getFaultySensors());
             terminate();
         });
-
     }
+
     public  void generateErrorOutputFile(String error, List<String> faultySensors) {
 
         ErrorDetails errorDetails = new ErrorDetails(error, faultySensors, Map.of(), List.of(), statisticalFolder);

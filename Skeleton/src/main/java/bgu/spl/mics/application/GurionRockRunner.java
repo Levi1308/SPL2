@@ -3,18 +3,14 @@ package bgu.spl.mics.application;
 
 import bgu.spl.mics.application.objects.*;
 import bgu.spl.mics.application.services.*;
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import com.google.gson.*;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
+
 
 
 
@@ -27,6 +23,17 @@ import java.util.List;
  */
 public class GurionRockRunner {
 
+
+    public static void saveOutputFile(SimulationOutput output, String outputPath) {
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        try (FileWriter writer = new FileWriter(outputPath)) {
+            gson.toJson(output, writer);
+            System.out.println("Simulation results saved to: " + outputPath);
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.err.println("Failed to save simulation results.");
+        }
+    }
     /**
      * The main method of the simulation.
      * This method sets up the necessary components, parses configuration files,
@@ -73,14 +80,16 @@ public class GurionRockRunner {
                 int cameraFrequency = cameraConfig.get("frequency").getAsInt();
                 String cameraKey = cameraConfig.get("camera_key").getAsString();
                 Camera c=new Camera(cameraId,cameraFrequency);
-                c.setDetectedObjectsList(readerCamera.getStampedDetectedObjects());
+                c.setDetectedObjectsMap(readerCamera.getStampedDetectedObjects());
                 cameraList.add(c);
             }
 
-            for(Camera c: cameraList)
-            {
-                CameraService cameraService=new CameraService(c);
+            for(Camera c: cameraList) {
+                CameraService cameraService = new CameraService(c);
+                Thread cameraThread = new Thread(cameraService);
+                cameraThread.start();
             }
+
 
             // Extracting data from the "LidarWorkers" section
             JsonObject lidarWorkers = configObject.getAsJsonObject("LidarWorkers");
@@ -101,7 +110,9 @@ public class GurionRockRunner {
             }
             for(LiDarWorkerTracker lidar: liDarWorkerTrackerList)
             {
-                LiDarService lidarService=new LiDarService(lidar);
+                LiDarService lidarService = new LiDarService(lidar);
+                Thread lidarThread = new Thread(lidarService);
+                lidarThread.start();
             }
 
             String poseJsonFile = configObject.get("poseJsonFile").getAsString();
@@ -120,10 +131,23 @@ public class GurionRockRunner {
             FusionSlamService fusionSlamService=new FusionSlamService(new FusionSlam());
 
             //start simulation
-            timeService.run();
+            Thread timeThread = new Thread(timeService);
+            timeThread.start();
+
+
+            SimulationOutput output = new SimulationOutput(StatisticalFolder.getInstance(),fusionSlamService.getFusionSlam().getLandmarks() , null);
+
+            String outputPath = parentDir + File.separator + "output.json";
+
+            saveOutputFile(output, outputPath);
+
+
+
+
 
         } catch (IOException e) {
-
+            e.printStackTrace();
         }
+
     }
 }

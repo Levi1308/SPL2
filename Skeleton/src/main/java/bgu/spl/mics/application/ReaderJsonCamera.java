@@ -19,13 +19,13 @@ import java.util.Map;
 
 public class ReaderJsonCamera {
     String path;
-    Map<Integer, StampedDetectedObjects> temp;
-    List<StampedDetectedObjects> stampedDetectedObjects;
+    Map<Integer, StampedDetectedObjects> stampedDetectedObjects;
+
 
     public ReaderJsonCamera(String path) {
         this.path = path;
-        temp = new HashMap<>();
-        stampedDetectedObjects = new ArrayList<>();
+        stampedDetectedObjects = new HashMap<>();
+
         loadData();
     }
 
@@ -58,15 +58,14 @@ public class ReaderJsonCamera {
                         DetectedObject obj = new DetectedObject(id, description);
                         detectedObjectList.add(obj);
                     }
-                    StampedDetectedObjects stampedobj = temp.getOrDefault(time, null);
+                    StampedDetectedObjects stampedobj = stampedDetectedObjects.getOrDefault(time, null);
                     if (stampedobj != null) {
                         stampedobj.AddDetectedObject(detectedObjectList);
                     } else {
                         stampedobj = new StampedDetectedObjects(time, detectedObjectList);
-                        temp.put(time, stampedobj);
+                        stampedDetectedObjects.put(time, stampedobj);
                     }
                 }
-                stampedDetectedObjects.addAll(temp.values());
             }
         } catch (IOException e) {
             //e.printStackTrace();
@@ -74,7 +73,7 @@ public class ReaderJsonCamera {
         }
     }
 
-    public List<StampedDetectedObjects> getStampedDetectedObjects() {
+    public Map<Integer,StampedDetectedObjects> getStampedDetectedObjects() {
         return stampedDetectedObjects;
     }
 }

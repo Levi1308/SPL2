@@ -2,14 +2,12 @@ package bgu.spl.mics.application.services;
 
 import bgu.spl.mics.Future;
 import bgu.spl.mics.application.messages.CrashedBroadcast;
-import bgu.spl.mics.application.objects.DetectedObject;
+import bgu.spl.mics.application.objects.*;
 import bgu.spl.mics.MicroService;
-import bgu.spl.mics.application.objects.Camera;
 import bgu.spl.mics.application.messages.DetectObjectsEvent;
 import bgu.spl.mics.application.messages.TerminatedBroadcast;
 import bgu.spl.mics.application.messages.TickBroadcast;
 import bgu.spl.mics.application.objects.DetectedObject;
-import bgu.spl.mics.application.objects.StampedDetectedObjects;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -19,12 +17,13 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 
 /**
  * CameraService is responsible for processing data from the camera and
  * sending DetectObjectsEvents to LiDAR workers.
- * 
+ *
  * This service interacts with the Camera object to detect objects and updates
  * the system's StatisticalFolder upon sending its observations.
  */
@@ -53,51 +52,64 @@ public class CameraService extends MicroService {
         subscribeBroadcast(TickBroadcast.class, tickBroadcast -> {
             this.camera.setTick(tickBroadcast.getTick());
             sendDetectObjectsEvents();
-        });
 
-        subscribeBroadcast(TerminatedBroadcast.class, terminated -> {
-            terminate();
-        });
-
-        subscribeBroadcast(CrashedBroadcast.class, crash -> {
-            if (crash.getSensorType().equals("Camera") && crash.getSensorId().equals(camera.getId())) {
+            if (checkForSensorDisconnection()) {
+                List<String> faultySensors = List.of(getName());
+                System.err.println(getName() + " detected sensor disconnection. Broadcasting CrashedBroadcast.");
+                sendBroadcast(new CrashedBroadcast("Camera disconnected", faultySensors));
                 terminate();
             }
         });
 
+        subscribeBroadcast(TerminatedBroadcast.class, terminated -> {
+            System.out.println(getName() + " received TerminatedBroadcast. Terminating.");
+            terminate();
+        });
+
+        subscribeBroadcast(CrashedBroadcast.class, crash -> {
+            System.err.println(getName() + " received CrashedBroadcast: " + crash.getError());
+            terminate();
+        });
+
+        System.out.println(getName() + " initialized and ready to process TickBroadcasts.");
+    }
+
+
+    private boolean checkForSensorDisconnection() {
+       return this.camera.getStatus() == STATUS.ERROR;
     }
 
     /**
      * Sends DetectObjectsEvent if the current tick matches the camera's frequency.
      */
     private void sendDetectObjectsEvents() {
-        if (this.camera.getTick() - lastEventTick >= camera.getFrequency()) {
-            List<DetectedObject> detectedObjects = readDetectedObjectsFromJSON(this.camera.getTick());
+        int tickDifference = camera.getTick() - lastEventTick;
+        if (tickDifference >= camera.getFrequency()) {
+            List<DetectedObject> detectedObjects = camera.getDetectedObjects(camera.getTick());
+
             if (!detectedObjects.isEmpty()) {
-                sendEvent(new DetectObjectsEvent(detectedObjects,this.camera.getTick()));
-                lastEventTick = this.camera.getTick();
-                System.out.println("Camera " + camera.getId() + " sent DetectObjectsEvent at tick " + this.camera.getTick());
-                camera.addDetectedObjects(detectedObjects, this.camera.getTick());
+                System.out.println("Camera " + camera.getId() + " detected " + detectedObjects.size() + " objects at tick " + camera.getTick());
+
+                sendEvent(new DetectObjectsEvent(detectedObjects, this.camera.getTick()));
+                lastEventTick = camera.getTick();
+                camera.addDetectedObjects(detectedObjects, camera.getTick());
+
+                System.out.println("DetectObjectsEvent sent by Camera " + camera.getId() + " at tick " + camera.getTick());
+            } else {
+                System.out.println("Camera " + camera.getId() + " detected no objects at tick " + camera.getTick());
             }
+        } else {
+            System.out.println("Camera " + camera.getId() + " skipping DetectObjectsEvent. Tick difference: " + tickDifference);
         }
     }
 
-    /**
-     * Reads detected objects from the camera's JSON data file.
-     *
-     * @param tick The current tick to fetch detected objects for.
-     * @return List of detected objects.
-     */
-    private List<DetectedObject> readDetectedObjectsFromJSON(int tick) {
-       //
-        //return detectedObjects;
-        return null;
-    }
 
-    private void handleError() {
-        sendBroadcast(new CrashedBroadcast("Camera", "camera1", "Camera disconnected"));
-        terminate();
-    }
+
+
+
+
+
+
 
 
 

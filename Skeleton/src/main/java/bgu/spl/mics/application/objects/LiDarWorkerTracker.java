@@ -54,7 +54,6 @@ public class LiDarWorkerTracker {
     }
     public void addTrackedObject(TrackedObject obj){
         lastTrackedobjects.add(obj);
-        //במידה וגיליתי עצם חדש שכבר גיליתי אותו
         /*for(TrackedObject trackedObject:lastTrackedobjects)
         {
             if(trackedObject.getId()==obj.getId())

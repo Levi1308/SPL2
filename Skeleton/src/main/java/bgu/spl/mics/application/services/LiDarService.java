@@ -38,17 +38,28 @@ public class LiDarService extends MicroService {
         subscribeBroadcast(TickBroadcast.class, (TickBroadcast broadcast) -> {
             int currentTick = broadcast.getTick();
             onTick(currentTick);
+            if (checkForSensorDisconnection()) {
+                List<String> faultySensors = List.of(getName());
+                sendBroadcast(new CrashedBroadcast("LiDAR disconnected", faultySensors));
+                terminate();
+            }
         });
         subscribeBroadcast(TerminatedBroadcast.class, (TerminatedBroadcast broadcast) -> {
             onTerminate();
         });
-        subscribeBroadcast(CrashedBroadcast.class, (CrashedBroadcast broadcast) -> {
+        subscribeBroadcast(CrashedBroadcast.class, crash -> {
+            System.out.println(getName() + " terminating due to error: " + crash.getError());
+            onTerminate();
             //int currentTick = broadcast.getTick();
             //handleTick(currentTick);
         });
         subscribeEvent(DetectObjectsEvent.class, (DetectObjectsEvent event) -> {
             onDetectedObject(event.getTime(),event.getDetectedObjects());
         });
+    }
+
+    private boolean checkForSensorDisconnection() {
+        return liDarTracker.getStatus() == STATUS.ERROR;
     }
 
     public void onTick(int currentTick){

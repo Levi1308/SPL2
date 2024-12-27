@@ -1,13 +1,21 @@
 package bgu.spl.mics.application.services;
 
 import bgu.spl.mics.MicroService;
+import bgu.spl.mics.application.GurionRockRunner;
+import bgu.spl.mics.application.messages.CrashedBroadcast;
 import bgu.spl.mics.application.messages.TerminatedBroadcast;
 import bgu.spl.mics.application.messages.TickBroadcast;
+import bgu.spl.mics.application.objects.ErrorDetails;
+import bgu.spl.mics.application.objects.SimulationOutput;
 import bgu.spl.mics.application.objects.StatisticalFolder;
 
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+
+import static bgu.spl.mics.application.GurionRockRunner.saveOutputFile;
 
 /**
  * TimeService acts as the global timer for the system, broadcasting TickBroadcast messages
@@ -48,6 +56,21 @@ public class TimeService extends MicroService {
                 terminate();
             }
         }, 0, TickTime, TimeUnit.MILLISECONDS);
+        subscribeBroadcast(CrashedBroadcast.class, crash -> {
+            System.out.println("Simulation stopping due to sensor failure: " + crash.getError());
+            generateErrorOutputFile(crash.getError(), crash.getFaultySensors());
+            terminate();
+        });
+
+    }
+    public  void generateErrorOutputFile(String error, List<String> faultySensors) {
+
+        ErrorDetails errorDetails = new ErrorDetails(error, faultySensors, Map.of(), List.of(), statisticalFolder);
+
+        SimulationOutput output = new SimulationOutput(statisticalFolder, null, errorDetails);
+
+        String outputPath = "example_input/output.json";
+        saveOutputFile(output, outputPath);
     }
 }
 

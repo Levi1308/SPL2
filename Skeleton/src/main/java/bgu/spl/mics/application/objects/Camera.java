@@ -4,7 +4,9 @@ import bgu.spl.mics.Future;
 import bgu.spl.mics.application.messages.DetectObjectsEvent;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Represents a camera sensor on the robot.
@@ -14,7 +16,7 @@ import java.util.List;
 public class Camera {
     private final int id;
     private final int frequency;
-    private List<StampedDetectedObjects> detectedObjectsList;
+    private Map<Integer,StampedDetectedObjects> detectedObjectsMap;
     private STATUS status;
     private int tick;
     private StatisticalFolder statisticalFolder = StatisticalFolder.getInstance();
@@ -23,7 +25,7 @@ public class Camera {
     public Camera(int id, int frequency) {
         this.id = id;
         this.frequency = frequency;
-        this.detectedObjectsList = new ArrayList<>();
+        this.detectedObjectsMap = new HashMap<Integer ,StampedDetectedObjects >();
         this.status = STATUS.UP;
         tick = 0;
     }
@@ -37,8 +39,8 @@ public class Camera {
     public void addDetectedObjects(List<DetectedObject> detectedObjects, int tick) {
         if (!detectedObjects.isEmpty()) {
             StampedDetectedObjects stamped = new StampedDetectedObjects(tick,detectedObjects);
-            detectedObjectsList.add(stamped);
-            statisticalFolder.incrementDetectedObjects(1);
+            detectedObjectsMap.put(tick, stamped);
+            statisticalFolder.incrementDetectedObjects(stamped.getDetectedObjects().size());
 
         }
     }
@@ -61,23 +63,18 @@ public class Camera {
         return frequency;
     }
 
-    public void setDetectedObjectsList(List<StampedDetectedObjects> detectedObjectsList) {
-        this.detectedObjectsList = detectedObjectsList;
+    public void setDetectedObjectsMap(Map<Integer,StampedDetectedObjects> detectedObjectsMap) {
+        this.detectedObjectsMap = detectedObjectsMap;
     }
 
-    public List<StampedDetectedObjects> getStampedDetectedObjectsList() {
-        return detectedObjectsList;
+    public Map<Integer,StampedDetectedObjects> getStampedDetectedObjectsMap() {
+        return detectedObjectsMap;
     }
 
-
-    public List<DetectedObject> getDetectedObjectsList(int time) {
-        for (StampedDetectedObjects stamped : detectedObjectsList) {
-            if (stamped.getTime() == time) {
-                return stamped.getDetectedObjects();
-            }
-        }
-        return null;
+    public List<DetectedObject> getDetectedObjects(int tick) {
+        return detectedObjectsMap.get(tick).getDetectedObjects();
     }
+
 
 
 }

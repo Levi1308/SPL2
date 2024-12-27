@@ -64,4 +64,7 @@ public class FusionSlamService extends MicroService {
 
     }
 
+    public FusionSlam getFusionSlam() {
+        return fusionSlam;
+    }
 }

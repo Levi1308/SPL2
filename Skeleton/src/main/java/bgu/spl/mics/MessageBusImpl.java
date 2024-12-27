@@ -103,12 +103,11 @@ public class MessageBusImpl implements MessageBus {
 
 	@Override
 	public Message awaitMessage(MicroService m) throws InterruptedException {
-		while (queues.get(m).isEmpty()) {
-			wait();
+		synchronized (this){
+		while (queues.get(m) == null) {
+			this.wait();
 		}
 		return queues.get(m).poll();
 	}
-
-	
-
+    }
 }

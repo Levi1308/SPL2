@@ -14,5 +14,4 @@ public class SimulationOutput {
         this.landmarks = landmarks;
         this.error = error;
     }
-
 }

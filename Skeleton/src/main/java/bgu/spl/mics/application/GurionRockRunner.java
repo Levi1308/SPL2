@@ -149,16 +149,16 @@ public class GurionRockRunner {
             threads.add(timeThread);
             timeThread.start();
 
-            /*
+
             for (Thread t : threads) {
                 try {
-                    //t.join();
+                    t.join();
                     System.out.println(t.getName() + " has finished.");
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
-            */
+
 
             SimulationOutput output = new SimulationOutput(StatisticalFolder.getInstance(),fusionSlamService.getFusionSlam().getLandmarks() , null);
             String outputPath = parentDir + File.separator + "output.json";

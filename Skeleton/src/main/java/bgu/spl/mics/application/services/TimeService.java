@@ -49,7 +49,7 @@ public class TimeService extends MicroService {
         ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
         scheduler.scheduleAtFixedRate(() -> {
-            if (ticks.get() <= Duration) {
+            if (ticks.get() < Duration) {
                 sendBroadcast(new TickBroadcast(ticks.getAndIncrement()));
                 System.out.println("Tick " + ticks.get() + " broadcasted.");
                 statisticalFolder.incrementRuntime();
@@ -57,7 +57,6 @@ public class TimeService extends MicroService {
                 sendBroadcast(new TerminatedBroadcast(getName()));
                 System.out.println("Simulation ended at tick " + ticks.get());
                 scheduler.shutdown();
-                terminate();
             }
         }, 0, TickTime, TimeUnit.MILLISECONDS);
 
@@ -65,6 +64,11 @@ public class TimeService extends MicroService {
         subscribeBroadcast(CrashedBroadcast.class, crash -> {
             System.out.println("Simulation stopping due to sensor failure: " + crash.getError());
             generateErrorOutputFile(crash.getError(), crash.getFaultySensors());
+            terminate();
+        });
+
+        subscribeBroadcast(TerminatedBroadcast.class, terminated -> {
+            System.out.println(getName() + " received TerminatedBroadcast. Terminating.");
             terminate();
         });
     }

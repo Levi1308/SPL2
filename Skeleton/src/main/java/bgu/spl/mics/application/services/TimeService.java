@@ -49,7 +49,7 @@ public class TimeService extends MicroService {
         ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
         scheduler.scheduleAtFixedRate(() -> {
-            if (ticks.get() < Duration) {
+            if (ticks.get() <= Duration) {
                 sendBroadcast(new TickBroadcast(ticks.getAndIncrement()));
                 System.out.println("Tick " + ticks.get() + " broadcasted.");
                 statisticalFolder.incrementRuntime();

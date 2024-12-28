@@ -98,4 +98,10 @@ public class StatisticalFolder {
         return numLandmarks.get();
     }
 
+    public void reset() {
+        this.systemRuntime.set(0);
+        this.numTrackedObjects.set(0);
+        this.numDetectedObjects.set(0);
+        this.numLandmarks.set(0);
+    }
 }

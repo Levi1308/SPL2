@@ -107,7 +107,5 @@ public class FusionSlam {
         return globalPoints;
     }
 
-
-
 }
 

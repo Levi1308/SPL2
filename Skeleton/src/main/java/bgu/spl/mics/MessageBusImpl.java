@@ -131,4 +131,19 @@ public class MessageBusImpl implements MessageBus {
         }
     }
 
+    public  Map<Class<? extends Event>, List<MicroService>> getEventSubscribers() {
+        return eventSubscribers;
+    }
+
+    public Map<Event, Future> getEventFutures() {
+        return eventFutures;
+    }
+
+    public Map<Class<? extends Broadcast>, List<MicroService>> getBroadcastSubscribers() {
+        return broadcastSubscribers;
+    }
+
+    public Map<MicroService, Queue<Message>> getQueues() {
+        return queues;
+    }
 }

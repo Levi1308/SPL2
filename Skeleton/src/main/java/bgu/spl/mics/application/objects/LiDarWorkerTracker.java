@@ -41,6 +41,7 @@ public class LiDarWorkerTracker {
     public void setFrequency(int frequency) {
         this.frequency = frequency;
     }
+
     public List<TrackedObject> onTick(int currentTick) {
         List<TrackedObject> lidarlist=getLastTrackedobjects();
         List<TrackedObject> allTrackedObj=new ArrayList<>();

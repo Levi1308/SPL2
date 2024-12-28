@@ -45,7 +45,7 @@ public class Future<T> {
 	/**
      * Resolves the result of this Future object.
      */
-	public void resolve (T result) {
+	public synchronized void resolve (T result) {
 		if(!isDone){
 			this.result = result;
 			this.isDone = true;

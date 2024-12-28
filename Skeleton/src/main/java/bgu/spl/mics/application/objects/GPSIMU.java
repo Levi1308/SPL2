@@ -12,6 +12,7 @@ public class GPSIMU {
     private int currentTick;
     private STATUS status;
     private List<Pose> poses;
+
     public GPSIMU(){
         currentTick=0;
         poses=new ArrayList<>();
@@ -40,4 +41,7 @@ public class GPSIMU {
     public void addPose(Pose pose){
         poses.add(pose);
     }
+
+
+
 }

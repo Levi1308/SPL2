@@ -13,7 +13,7 @@ import java.util.Map;
 public class FusionSlam {
     private Pose currentPose;
     private Map<String, LandMark> landmarks;
-    private List<Pose> Poses;
+    private Map<Integer,Pose> Poses;
     private int Tick;
     private StatisticalFolder statisticalFolder = StatisticalFolder.getInstance();
 
@@ -25,7 +25,7 @@ public class FusionSlam {
     public FusionSlam() {
         this.currentPose = new Pose(0, 0, 0,0);
         this.landmarks =  new HashMap<>();
-        this.Poses = new ArrayList<>();
+        this.Poses = new HashMap<>();
         this.Tick = 0;
     }
 
@@ -36,29 +36,47 @@ public class FusionSlam {
 
     public Pose getCurrentPose() {return this.currentPose;}
 
-    public Map<String, LandMark> getLandmarks() {return this.landmarks;}
+    public void setCurrentPose(Pose currentPose) {
+        this.currentPose = currentPose;
+    }
 
-    public List<Pose> getPoses() {return this.Poses;}
+    public synchronized Map<String, LandMark> getLandmarks() {
+        return new HashMap<>(this.landmarks);  // Return a copy to avoid concurrency issues
+    }
+
+
+    public HashMap<Integer, Pose> getPoses() {
+        return new HashMap<>(this.Poses);
+    }
 
     public Pose addPose(Pose pose) {
-        this.Poses.add(pose);
+        this.Poses.put(pose.getTime(), pose);
         this.currentPose = pose;
         return pose;
     }
 
     public void doMapping(List<TrackedObject> trackedObjects) {
         for (TrackedObject obj : trackedObjects) {
+            if (obj.getCoordinate() == null || obj.getCoordinate().isEmpty()) {
+                System.out.println("TrackedObject " + obj.getId() + " has no coordinates.");
+                continue;
+            }
+
+            Pose mappingPose = getPoses().get(obj.getTime());
+            if (mappingPose == null) {
+                System.out.println("No matching pose for tracked object " + obj.getId() + " at tick " + obj.getTime());
+                continue;
+            }
+
+            List<CloudPoint> globalPoints = convertToGlobal(obj.getCoordinate(), mappingPose);
             String id = obj.getId();
 
-            // Convert coordinates to global system
-            List<CloudPoint> globalPoints = convertToGlobal(obj.getCoordinate(), currentPose);
-
             if (landmarks.containsKey(id)) {
-                // Update existing landmark
+                System.out.println("Updating landmark " + id);
                 LandMark existingLandmark = landmarks.get(id);
                 existingLandmark.UpdateCoordinates(globalPoints);
             } else {
-                // Add new landmark
+                System.out.println("Adding new landmark " + id);
                 LandMark newLandmark = new LandMark(id, obj.getDescription(), globalPoints);
                 landmarks.put(id, newLandmark);
                 statisticalFolder.incrementLandmarks(1);
@@ -66,21 +84,28 @@ public class FusionSlam {
         }
     }
 
+
+
     /**
      * Converts local LiDAR coordinates to the global coordinate system.
      */
     private List<CloudPoint> convertToGlobal(List<CloudPoint> localPoints, Pose pose) {
         List<CloudPoint> globalPoints = new ArrayList<>();
 
+        double yawRad = Math.toRadians(pose.getYaw());
+        double cosTheta = Math.cos(yawRad);
+        double sinTheta = Math.sin(yawRad);
+
         for (CloudPoint point : localPoints) {
-            Double globalX = point.getX() + pose.getX();
-            Double globalY = point.getY() + pose.getY();
+            double globalX = cosTheta * point.getX() - sinTheta * point.getY() + pose.getX();
+            double globalY = sinTheta * point.getX() + cosTheta * point.getY() + pose.getY();
             globalPoints.add(new CloudPoint(globalX, globalY));
+
+            System.out.println("Converted local point (" + point.getX() + ", " + point.getY() + ") " +
+                    "to global point (" + globalX + ", " + globalY + ")" + " with pose: " + pose.getX() + ", " + pose.getY() );
         }
         return globalPoints;
     }
-
-
 
 
 

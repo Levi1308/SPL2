@@ -5,6 +5,7 @@ import bgu.spl.mics.Broadcast;
 import bgu.spl.mics.MicroService;
 import bgu.spl.mics.Future;
 import bgu.spl.mics.Message;
+import bgu.spl.mics.application.messages.PoseEvent;
 import bgu.spl.mics.application.objects.LiDarDataBase;
 
 import java.util.Map;
@@ -21,14 +22,16 @@ import java.util.LinkedList;
  * Only private fields and methods can be added to this class.
  */
 public class MessageBusImpl implements MessageBus {
-	private class MessageBusImplHolder{
+
+
+
+    private class MessageBusImplHolder{
 		private static MessageBusImpl instance = new MessageBusImpl();
 	}
     private Map<Class<? extends Event>, List<MicroService>> eventSubscribers;
     private Map<Class<? extends Broadcast>, List<MicroService>> broadcastSubscribers;
     private Map<MicroService, Queue<Message>> queues;
     private Map<Event, Future> eventFutures;
-    private static MessageBusImpl instance = null;
 
     private MessageBusImpl() {
         this.eventSubscribers = new HashMap<>();
@@ -54,47 +57,63 @@ public class MessageBusImpl implements MessageBus {
     }
 
     @Override
-    public synchronized <T> void complete(Event<T> e, T result) {
+    public <T> void complete(Event<T> e, T result) {
         Future<T> future = eventFutures.remove(e);
         if (future != null) {
-            future.resolve(result);
-        }
-
-    }
-
-    @Override
-    public synchronized void sendBroadcast(Broadcast b) {
-        if (broadcastSubscribers.containsKey(b.getClass())) {
-            for (MicroService m : broadcastSubscribers.get(b.getClass())) {
-                queues.get(m).add(b);
+            synchronized (future) {
+                future.resolve(result);
             }
         }
-
     }
 
 
     @Override
-    public synchronized <T> Future<T> sendEvent(Event<T> e) {
-        if (eventSubscribers.containsKey(e.getClass())) {
-            List<MicroService> subscribers = eventSubscribers.get(e.getClass());
-            MicroService m = subscribers.remove(0);
-            subscribers.add(m);
-            queues.get(m).add(e);
+	public synchronized void sendBroadcast(Broadcast b) {
+		if (broadcastSubscribers.containsKey(b.getClass())) {
+			for (MicroService m : broadcastSubscribers.get(b.getClass())) {
+				Queue<Message> queue = queues.get(m);
+				if (queue != null) {
+					queue.add(b);
+					this.notifyAll();
+				}
+			}
+		}
+	}
 
-            Future<T> future = new Future<>();
-            eventFutures.put(e, future);
-            return future;
-        }
-        return null;
-    }
 
-    @Override
-    public synchronized void register(MicroService m) {
-        queues.putIfAbsent(m, new LinkedList<>());
 
-    }
+	@Override
+	public synchronized <T> Future<T> sendEvent(Event<T> e) {
+		if (eventSubscribers.containsKey(e.getClass())) {
+			List<MicroService> subscribers = eventSubscribers.get(e.getClass());
+			if (!subscribers.isEmpty()) {
+				MicroService m = subscribers.remove(0);
+				subscribers.add(m);
+				Queue<Message> queue = queues.get(m);
+				if (queue != null) {
+					queue.add(e);
+					this.notifyAll();
+				}
 
-    @Override
+				Future<T> future = new Future<>();
+				eventFutures.put(e, future);
+				return future;
+			}
+		}
+		return null;
+	}
+
+	@Override
+	public synchronized void register(MicroService m) {
+		if (queues.putIfAbsent(m, new LinkedList<>()) != null) {
+			System.err.println("Service already registered: " + m.getName());
+		} else {
+			System.out.println("Service registered successfully: " + m.getName());
+		}
+	}
+
+
+	@Override
     public synchronized void unregister(MicroService m) {
         queues.remove(m);
         eventSubscribers.values().forEach(list -> list.remove(m));
@@ -105,10 +124,11 @@ public class MessageBusImpl implements MessageBus {
     @Override
     public Message awaitMessage(MicroService m) throws InterruptedException {
         synchronized (this) {
-            while (queues.get(m) == null) {
+            while (queues.get(m).isEmpty()) {
                 this.wait();
             }
             return queues.get(m).poll();
         }
     }
+
 }

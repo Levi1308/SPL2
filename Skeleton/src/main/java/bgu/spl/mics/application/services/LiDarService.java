@@ -25,6 +25,8 @@ import java.util.concurrent.ConcurrentSkipListSet;
 public class LiDarService extends MicroService {
     private LiDarWorkerTracker liDarTracker;
     private LiDarDataBase database;
+    private StatisticalFolder statisticalFolder = StatisticalFolder.getInstance();
+
 
     //LiDarWorkerTracker liDarWorkerTracker
     public LiDarService(LiDarWorkerTracker liDarTracker) {
@@ -66,30 +68,52 @@ public class LiDarService extends MicroService {
         sendEvent(new TrackedObjectsEvent(liDarTracker.onTick(currentTick)));
     }
 
-    public void onTerminate(){
-        if(liDarTracker.getLastTrackedobjects().isEmpty())
-            sendBroadcast(new TerminatedBroadcast("LidarService"));
+    public void onTerminate() {
+        System.out.println(getName() + " is terminating.");
+        if (liDarTracker.getLastTrackedobjects().isEmpty()) {
+            sendBroadcast(new TerminatedBroadcast("LiDarService " + getName()));
+        }
+        System.out.println("Final tracked objects: " + liDarTracker.getLastTrackedobjects().size());
         terminate();
     }
-    public void onCrash(){
-        //if() need to shut down
-    }
+
 
     public void onDetectedObject(int currentTime, List<DetectedObject> detectedObjectList){
-        for (DetectedObject object: detectedObjectList)
-        {
-            if(object.getId()!="ERROR") {
-                List<List<Double>> doublePoints = database.RetriveCloudPoints(object,currentTime);
-                List<CloudPoint> cloudPoints = new ArrayList<>();
-                for (List<Double> list : doublePoints)
-                    cloudPoints.add(new CloudPoint(list.get(0), list.get(1)));
-                TrackedObject trackedObject = new TrackedObject(object.getId(), currentTime, object.getDescription(), cloudPoints);
-                liDarTracker.addTrackedObject(trackedObject);
-            }
-            //else
-                //sendBroadcast(new CrashedBroadcast("Lidar",liDarTracker.getId(),"dsa"));
+        if (detectedObjectList.isEmpty()) {
+            System.out.println("No objects detected at tick " + currentTime);
+            return;
         }
 
+        List<TrackedObject> trackedObjects = new ArrayList<>();
+
+        for (DetectedObject object : detectedObjectList) {
+            if (!object.getId().equals("ERROR")) {
+                List<List<Double>> doublePoints = database.RetriveCloudPoints(object, currentTime);
+                List<CloudPoint> cloudPoints = new ArrayList<>();
+
+                for (List<Double> list : doublePoints) {
+                    cloudPoints.add(new CloudPoint(list.get(0), list.get(1)));
+                }
+
+                TrackedObject trackedObject = new TrackedObject(object.getId(), currentTime, object.getDescription(), cloudPoints);
+                liDarTracker.addTrackedObject(trackedObject);
+                trackedObjects.add(trackedObject);
+                statisticalFolder.incrementTrackedObjects(1);
+            }
+
+            if (object.getId().equals("ERROR")) {
+                List<String> faultySensors = List.of(getName());
+                sendBroadcast(new CrashedBroadcast("LiDAR detected error object", faultySensors));
+                terminate();
+                return;
+            }
+        }
+
+        if (!trackedObjects.isEmpty()) {
+            System.out.println("Sending TrackedObjectsEvent with " + trackedObjects.size() + " objects at tick " + currentTime);
+            sendEvent(new TrackedObjectsEvent(trackedObjects));
+        }
     }
+
 
 }

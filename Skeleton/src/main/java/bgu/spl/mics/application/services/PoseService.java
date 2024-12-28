@@ -44,24 +44,38 @@ public class PoseService extends MicroService {
     protected void initialize() {
         subscribeBroadcast(TickBroadcast.class, (TickBroadcast broadcast) -> {
             int currentTick = broadcast.getTick();
+            System.out.println(getName() + " received tick " + currentTick);
             this.gpsimu.setCurrentTick(broadcast.getTick());
             onTick(currentTick);
-
         });
+
+        subscribeBroadcast(TerminatedBroadcast.class, (TerminatedBroadcast broadcast) -> {
+            System.out.println("PoseService received TerminatedBroadcast. Terminating.");
+            terminate();
+        });
+
+        System.out.println(getName() + " initialized and waiting for ticks.");
     }
 
-    public void onTick(int currentTick){
+
+    public void onTick(int currentTick) {
         gpsimu.setCurrentTick(currentTick);
-        try{
-            Pose temp=poses.get(currentTick);
-            gpsimu.addPose(temp);
-            PoseEvent poseEvent=new PoseEvent(temp);
-            sendEvent(poseEvent);
+
+        Pose temp;
+        if (currentTick < poses.size()) {
+            temp = poses.get(currentTick);
+        } else {
+            // Use the last pose repeatedly
+            temp = poses.get(poses.size() - 1);
+            System.out.println("Repeating last pose at tick " + currentTick);
         }
-        catch(Exception ex)
-        {
-            //finish with all th poses;
-        }
+
+        gpsimu.addPose(temp);
+        PoseEvent poseEvent = new PoseEvent(temp);
+        sendEvent(poseEvent);
+        System.out.println("Pose sent at tick " + currentTick);
     }
 
-    }
+
+
+}

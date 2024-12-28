@@ -130,6 +130,9 @@ public class GurionRockRunner {
             //System.out.println(readerJsonPose.toString());
             PoseService poseService=new PoseService(new GPSIMU());
             poseService.setPoses(readerJsonPose.getPoses());
+            Thread poseThread = new Thread(poseService);
+            threads.add(poseThread);
+            poseThread.start();
 
             int tickTime = configObject.get("TickTime").getAsInt();
             int duration = configObject.get("Duration").getAsInt();
@@ -137,12 +140,16 @@ public class GurionRockRunner {
 
             TimeService timeService=new TimeService(tickTime,duration);
             FusionSlamService fusionSlamService=new FusionSlamService(new FusionSlam());
+            Thread fusionSlamThread = new Thread(fusionSlamService);
+            threads.add(fusionSlamThread);
+            fusionSlamThread.start();
 
             //start simulation
             Thread timeThread = new Thread(timeService);
+            threads.add(timeThread);
             timeThread.start();
 
-            /*
+
             for (Thread t : threads) {
                 try {
                     t.join();
@@ -151,7 +158,7 @@ public class GurionRockRunner {
                     e.printStackTrace();
                 }
             }
-            */
+
 
             SimulationOutput output = new SimulationOutput(StatisticalFolder.getInstance(),fusionSlamService.getFusionSlam().getLandmarks() , null);
             String outputPath = parentDir + File.separator + "output.json";

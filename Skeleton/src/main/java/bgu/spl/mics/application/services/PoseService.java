@@ -60,18 +60,22 @@ public class PoseService extends MicroService {
 
     public void onTick(int currentTick) {
         gpsimu.setCurrentTick(currentTick);
+
+        Pose temp;
         if (currentTick < poses.size()) {
-            Pose temp = poses.get(currentTick);
-            gpsimu.addPose(temp);
-            PoseEvent poseEvent = new PoseEvent(temp);
-            sendEvent(poseEvent);
-            System.out.println("Pose sent at tick " + currentTick);
+            temp = poses.get(currentTick);
         } else {
-            System.out.println("No more poses available at tick " + currentTick + ". PoseService terminating.");
-            sendBroadcast(new TerminatedBroadcast(getName()));
-            terminate();
+            // Use the last pose repeatedly
+            temp = poses.get(poses.size() - 1);
+            System.out.println("Repeating last pose at tick " + currentTick);
         }
+
+        gpsimu.addPose(temp);
+        PoseEvent poseEvent = new PoseEvent(temp);
+        sendEvent(poseEvent);
+        System.out.println("Pose sent at tick " + currentTick);
     }
+
 
 
 }

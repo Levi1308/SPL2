@@ -84,26 +84,36 @@ public class LiDarService extends MicroService {
             return;
         }
 
-        for (DetectedObject object: detectedObjectList)
-        {
-            if(!object.getId().equals("ERROR")) {
-                List<List<Double>> doublePoints = database.RetriveCloudPoints(object,currentTime);
+        List<TrackedObject> trackedObjects = new ArrayList<>();
+
+        for (DetectedObject object : detectedObjectList) {
+            if (!object.getId().equals("ERROR")) {
+                List<List<Double>> doublePoints = database.RetriveCloudPoints(object, currentTime);
                 List<CloudPoint> cloudPoints = new ArrayList<>();
-                for (List<Double> list : doublePoints)
+
+                for (List<Double> list : doublePoints) {
                     cloudPoints.add(new CloudPoint(list.get(0), list.get(1)));
+                }
+
                 TrackedObject trackedObject = new TrackedObject(object.getId(), currentTime, object.getDescription(), cloudPoints);
                 liDarTracker.addTrackedObject(trackedObject);
+                trackedObjects.add(trackedObject);
                 statisticalFolder.incrementTrackedObjects(1);
             }
+
             if (object.getId().equals("ERROR")) {
                 List<String> faultySensors = List.of(getName());
                 sendBroadcast(new CrashedBroadcast("LiDAR detected error object", faultySensors));
                 terminate();
                 return;
             }
-
         }
 
+        if (!trackedObjects.isEmpty()) {
+            System.out.println("Sending TrackedObjectsEvent with " + trackedObjects.size() + " objects at tick " + currentTime);
+            sendEvent(new TrackedObjectsEvent(trackedObjects));
+        }
     }
+
 
 }

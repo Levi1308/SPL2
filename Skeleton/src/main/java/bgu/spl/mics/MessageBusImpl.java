@@ -5,6 +5,7 @@ import bgu.spl.mics.Broadcast;
 import bgu.spl.mics.MicroService;
 import bgu.spl.mics.Future;
 import bgu.spl.mics.Message;
+import bgu.spl.mics.application.messages.PoseEvent;
 import bgu.spl.mics.application.objects.LiDarDataBase;
 
 import java.util.Map;
@@ -22,7 +23,9 @@ import java.util.LinkedList;
  */
 public class MessageBusImpl implements MessageBus {
 
-	private class MessageBusImplHolder{
+
+
+    private class MessageBusImplHolder{
 		private static MessageBusImpl instance = new MessageBusImpl();
 	}
     private Map<Class<? extends Event>, List<MicroService>> eventSubscribers;
@@ -54,15 +57,17 @@ public class MessageBusImpl implements MessageBus {
     }
 
     @Override
-    public synchronized <T> void complete(Event<T> e, T result) {
+    public <T> void complete(Event<T> e, T result) {
         Future<T> future = eventFutures.remove(e);
         if (future != null) {
-            future.resolve(result);
+            synchronized (future) {
+                future.resolve(result);
+            }
         }
-
     }
 
-	@Override
+
+    @Override
 	public synchronized void sendBroadcast(Broadcast b) {
 		if (broadcastSubscribers.containsKey(b.getClass())) {
 			for (MicroService m : broadcastSubscribers.get(b.getClass())) {
@@ -125,4 +130,5 @@ public class MessageBusImpl implements MessageBus {
             return queues.get(m).poll();
         }
     }
+
 }

@@ -52,8 +52,6 @@ public class LiDarService extends MicroService {
         subscribeBroadcast(CrashedBroadcast.class, crash -> {
             System.out.println(getName() + " terminating due to error: " + crash.getError());
             onTerminate();
-            //int currentTick = broadcast.getTick();
-            //handleTick(currentTick);
         });
         subscribeEvent(DetectObjectsEvent.class, (DetectObjectsEvent event) -> {
             onDetectedObject(event.getTime(),event.getDetectedObjects());
@@ -103,7 +101,7 @@ public class LiDarService extends MicroService {
 
             if (object.getId().equals("ERROR")) {
                 List<String> faultySensors = List.of(getName());
-                sendBroadcast(new CrashedBroadcast("LiDAR detected error object", faultySensors));
+                sendBroadcast(new CrashedBroadcast(object.getDescription(), faultySensors));
                 terminate();
                 return;
             }

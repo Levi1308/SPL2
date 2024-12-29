@@ -2,6 +2,7 @@ package bgu.spl.mics.application.services;
 
 import bgu.spl.mics.Event;
 import bgu.spl.mics.MicroService;
+import bgu.spl.mics.application.messages.CrashedBroadcast;
 import bgu.spl.mics.application.messages.PoseEvent;
 import bgu.spl.mics.application.objects.CloudPoint;
 import bgu.spl.mics.application.objects.GPSIMU;
@@ -60,7 +61,6 @@ public class PoseService extends MicroService {
 
     public void onTick(int currentTick) {
         gpsimu.setCurrentTick(currentTick);
-
         Pose temp;
         if (currentTick < poses.size()) {
             temp = poses.get(currentTick);
@@ -69,7 +69,15 @@ public class PoseService extends MicroService {
             temp = poses.get(poses.size() - 1);
             System.out.println("Repeating last pose at tick " + currentTick);
         }
-
+        /*
+        if(temp.get)
+        {
+            List<String> faultySensors = new ArrayList<>();
+            faultySensors.add("PoseService");
+            sendBroadcast(new CrashedBroadcast(temp.get, faultySensors));
+            terminate();
+            return;
+        }*/
         gpsimu.addPose(temp);
         PoseEvent poseEvent = new PoseEvent(temp);
         sendEvent(poseEvent);

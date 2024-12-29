@@ -86,10 +86,11 @@ public class CameraService extends MicroService {
         int tickDifference = camera.getTick() - lastEventTick;
         if (tickDifference >= camera.getFrequency()) {
             List<DetectedObject> detectedObjects = camera.getDetectedObjects(camera.getTick());
-
+            DetectedObject error=AnErrorOccured(detectedObjects);
+            if(error!=null)
+            {
             if (!detectedObjects.isEmpty()) {
                 System.out.println("Camera " + camera.getId() + " detected " + detectedObjects.size() + " objects at tick " + camera.getTick());
-
                 sendEvent(new DetectObjectsEvent(detectedObjects, this.camera.getTick()));
                 lastEventTick = camera.getTick();
                 camera.addDetectedObjects(detectedObjects, camera.getTick());
@@ -98,9 +99,28 @@ public class CameraService extends MicroService {
             } else {
                 System.out.println("Camera " + camera.getId() + " detected no objects at tick " + camera.getTick());
             }
+        }
+            else
+            {
+                List<String> faultySensors=new ArrayList<>();
+                faultySensors.add("Camera"+camera.getId());
+                sendBroadcast(new CrashedBroadcast(error.getDescription(),faultySensors));
+                terminate();
+                return;
+            }
+
         } else {
             System.out.println("Camera " + camera.getId() + " skipping DetectObjectsEvent. Tick difference: " + tickDifference);
         }
+    }
+    public DetectedObject AnErrorOccured(List<DetectedObject> objectList)
+    {
+        for(DetectedObject d: objectList)
+        {
+            if(d.getId().equals("ERROR"))
+                return d;
+        }
+        return null;
     }
 
 

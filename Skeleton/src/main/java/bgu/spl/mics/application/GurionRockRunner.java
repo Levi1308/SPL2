@@ -74,7 +74,7 @@ public class GurionRockRunner {
 
             ReaderJsonCamera readerCamera=new ReaderJsonCamera(path);
 
-            //System.out.println(readerCamera.toString());
+            System.out.println(readerCamera.toString());
 
             // Iterate through the CameraConfigurations array
             for (JsonElement cameraElement : camerasConfigurations) {
@@ -83,7 +83,7 @@ public class GurionRockRunner {
                 int cameraFrequency = cameraConfig.get("frequency").getAsInt();
                 String cameraKey = cameraConfig.get("camera_key").getAsString();
                 Camera c=new Camera(cameraId,cameraFrequency);
-                c.setDetectedObjectsMap(readerCamera.getStampedDetectedObjects());
+                c.setDetectedObjectsMap(readerCamera.getStampedDetectedObjects(cameraKey));
                 cameraList.add(c);
             }
 

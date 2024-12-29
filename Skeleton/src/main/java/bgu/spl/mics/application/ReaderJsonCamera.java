@@ -19,12 +19,12 @@ import java.util.Map;
 
 public class ReaderJsonCamera {
     String path;
-    Map<Integer, StampedDetectedObjects> stampedDetectedObjects;
+    Map<String,Map<Integer, StampedDetectedObjects>> cameras;
 
 
     public ReaderJsonCamera(String path) {
         this.path = path;
-        stampedDetectedObjects = new HashMap<>();
+        cameras = new HashMap<>();
 
         loadData();
     }
@@ -45,6 +45,7 @@ public class ReaderJsonCamera {
 
             for (Map.Entry<String, JsonElement> cameraEntry : cameraData.entrySet()) {
                 String cameraKey = cameraEntry.getKey();
+                Map<Integer, StampedDetectedObjects> stampedDetectedObjects=new HashMap<>();
                 JsonArray cameraEntries = cameraEntry.getValue().getAsJsonArray();
                 for (JsonElement entryElement : cameraEntries) {
                     JsonObject entry = entryElement.getAsJsonObject();
@@ -66,6 +67,7 @@ public class ReaderJsonCamera {
                         stampedDetectedObjects.put(time, stampedobj);
                     }
                 }
+                cameras.put(cameraKey,stampedDetectedObjects);
             }
         } catch (IOException e) {
             //e.printStackTrace();
@@ -73,23 +75,31 @@ public class ReaderJsonCamera {
         }
     }
 
-    public Map<Integer,StampedDetectedObjects> getStampedDetectedObjects() {
-        return stampedDetectedObjects;
+    public Map<Integer,StampedDetectedObjects> getStampedDetectedObjects(String camera) {
+        return cameras.get(camera);
     }
+
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("ReaderJsonCamera{")
                 .append("path='").append(path).append('\'')
-                .append(", stampedDetectedObjects={");
+                .append(", cameras={");
 
-        for (Map.Entry<Integer, StampedDetectedObjects> entry : stampedDetectedObjects.entrySet()) {
-            builder.append("\n  Time=").append(entry.getKey())
-                    .append(": ").append(entry.getValue().toString());
+        for (Map.Entry<String, Map<Integer, StampedDetectedObjects>> cameraEntry : cameras.entrySet()) {
+            builder.append("\n  Camera=").append(cameraEntry.getKey())
+                    .append(": ");
+
+            Map<Integer, StampedDetectedObjects> stampedObjects = cameraEntry.getValue();
+            for (Map.Entry<Integer, StampedDetectedObjects> entry : stampedObjects.entrySet()) {
+                builder.append("\n    Time=").append(entry.getKey())
+                        .append(": ").append(entry.getValue().toString());
+            }
         }
         builder.append("\n}}");
 
         return builder.toString();
     }
+
 
 }

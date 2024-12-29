@@ -69,15 +69,6 @@ public class PoseService extends MicroService {
             temp = poses.get(poses.size() - 1);
             System.out.println("Repeating last pose at tick " + currentTick);
         }
-        /*
-        if(temp.get)
-        {
-            List<String> faultySensors = new ArrayList<>();
-            faultySensors.add("PoseService");
-            sendBroadcast(new CrashedBroadcast(temp.get, faultySensors));
-            terminate();
-            return;
-        }*/
         gpsimu.addPose(temp);
         PoseEvent poseEvent = new PoseEvent(temp);
         sendEvent(poseEvent);

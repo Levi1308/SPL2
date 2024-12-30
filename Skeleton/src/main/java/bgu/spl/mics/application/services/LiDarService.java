@@ -38,13 +38,13 @@ public class LiDarService extends MicroService {
     @Override
     protected void initialize() {
         subscribeBroadcast(TickBroadcast.class, (TickBroadcast broadcast) -> {
-            int currentTick = broadcast.getTick();
-            onTick(currentTick);
             if (checkForSensorDisconnection()) {
                 List<String> faultySensors = List.of(getName());
                 sendBroadcast(new CrashedBroadcast("LiDAR disconnected", faultySensors));
                 terminate();
             }
+            int currentTick = broadcast.getTick();
+            onTick(currentTick);
         });
         subscribeBroadcast(TerminatedBroadcast.class, (TerminatedBroadcast broadcast) -> {
             onTerminate();

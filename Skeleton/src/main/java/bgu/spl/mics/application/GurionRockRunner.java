@@ -74,7 +74,7 @@ public class GurionRockRunner {
 
             ReaderJsonCamera readerCamera=new ReaderJsonCamera(path);
 
-            System.out.println(readerCamera.toString());
+            //System.out.println(readerCamera.toString());
 
             // Iterate through the CameraConfigurations array
             for (JsonElement cameraElement : camerasConfigurations) {
@@ -96,7 +96,9 @@ public class GurionRockRunner {
 
 
             // Extracting data from the "LidarWorkers" section
+
             JsonObject lidarWorkers = configObject.getAsJsonObject("LidarWorkers");
+
             JsonArray lidarConfigurations = lidarWorkers.getAsJsonArray("LidarConfigurations");
             String lidarDataPath = lidarWorkers.get("lidars_data_path").getAsString();
             path=parentDir.concat(lidarDataPath);

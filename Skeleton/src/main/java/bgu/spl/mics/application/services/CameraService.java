@@ -87,7 +87,7 @@ public class CameraService extends MicroService {
         if (tickDifference >= camera.getFrequency()) {
             List<DetectedObject> detectedObjects = camera.getDetectedObjects(camera.getTick());
             DetectedObject error=AnErrorOccured(detectedObjects);
-            if(error!=null)
+            if(error==null)
             {
             if (!detectedObjects.isEmpty()) {
                 System.out.println("Camera " + camera.getId() + " detected " + detectedObjects.size() + " objects at tick " + camera.getTick());

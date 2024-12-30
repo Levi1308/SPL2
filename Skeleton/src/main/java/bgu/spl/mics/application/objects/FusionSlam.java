@@ -121,8 +121,8 @@ public class FusionSlam {
             double globalY = sinTheta * point.getX() + cosTheta * point.getY() + pose.getY();
             globalPoints.add(new CloudPoint(globalX, globalY));
 
-            System.out.println("Converted local point (" + point.getX() + ", " + point.getY() + ") " +
-                    "to global point (" + globalX + ", " + globalY + ")" + " with pose: " + pose.getX() + ", " + pose.getY() );
+            //System.out.println("Converted local point (" + point.getX() + ", " + point.getY() + ") " +
+                   // "to global point (" + globalX + ", " + globalY + ")" + " with pose: " + pose.getX() + ", " + pose.getY() );
         }
         return globalPoints;
     }

@@ -55,8 +55,14 @@ public class PoseService extends MicroService {
             terminate();
         });
 
+        subscribeBroadcast(CrashedBroadcast.class, (CrashedBroadcast broadcast) -> {
+            System.out.println("PoseService received CrashedBroadcast. Terminating.");
+            terminate();
+        });
+
         System.out.println(getName() + " initialized and waiting for ticks.");
     }
+
 
 
     public void onTick(int currentTick) {

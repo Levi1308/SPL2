@@ -5,12 +5,12 @@ import com.google.gson.GsonBuilder;
 import java.util.Map;
 
 public class SimulationOutput {
-    private StatisticalFolder statistics;
-    private Map<String, LandMark> landmarks;
+    private StatisticalFolder Statistics;
+    private Map<String, LandMark> landMarks;
 
     public SimulationOutput( Map<String, LandMark> landmarks) {
-        this.statistics = StatisticalFolder.getInstance();
-        this.landmarks = landmarks;
+        this.Statistics = StatisticalFolder.getInstance();
+        this.landMarks = landmarks;
     }
 
     // Serialize SimulationOutput to JSON
@@ -21,10 +21,10 @@ public class SimulationOutput {
 
     // Getters for landmarks and statistics
     public Map<String, LandMark> getLandmarks() {
-        return landmarks;
+        return landMarks;
     }
 
     public StatisticalFolder getStatistics() {
-        return statistics;
+        return Statistics;
     }
 }

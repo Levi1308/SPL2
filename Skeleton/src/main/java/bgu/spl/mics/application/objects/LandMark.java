@@ -37,12 +37,22 @@ public class LandMark {
       return coordinates;
    }
 
-   public void UpdateCoordinates(List<CloudPoint> points){
-      double sumx=0,sumy=0,sumz=0;
-      for(CloudPoint cp:coordinates){
-         sumx+=cp.getX();
-         sumy+=cp.getY();
+   public void UpdateCoordinates(List<CloudPoint> points) {
+      int minSize = Math.min(coordinates.size(), points.size());
+
+      for (int i = 0; i < minSize; i++) {
+         double x = (coordinates.get(i).getX() + points.get(i).getX()) / 2;
+         double y = (coordinates.get(i).getY() + points.get(i).getY()) / 2;
+         coordinates.set(i, new CloudPoint(x, y));
       }
-      //continue implement
+
+      // Handle case where new points list is longer
+      if (points.size() > coordinates.size()) {
+         for (int i = minSize; i < points.size(); i++) {
+            coordinates.add(points.get(i));
+         }
+      }
    }
+
+
 }

@@ -63,11 +63,13 @@ public class TimeService extends MicroService {
 
         subscribeBroadcast(CrashedBroadcast.class, crash -> {
             System.out.println("Simulation stopping due to sensor failure: " + crash.getError());
+            scheduler.shutdown();
             terminate();
         });
 
         subscribeBroadcast(TerminatedBroadcast.class, terminated -> {
             System.out.println(getName() + " received TerminatedBroadcast. Terminating.");
+            scheduler.shutdown();
             terminate();
         });
     }

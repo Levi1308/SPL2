@@ -54,9 +54,14 @@ public class CameraService extends MicroService {
             sendDetectObjectsEvents();
 
             if (checkForSensorDisconnection()) {
+                ErrorDetails.getInstance().setError(
+                        "camera disconnected",
+                        "Camera"+camera.getId(),
+                        FusionSlam.getInstance().getPosesTill(tickBroadcast.getTick())
+                );
                 sendBroadcast(new CrashedBroadcast(tickBroadcast.getTick(),"camera disconnected","Camera"+camera.getId()));
+
                 LastFrame.getInstance().setDetectedObjects(camera.getDetectedObjectstill(tickBroadcast.getTick()));
-                terminate();
             }
         });
 
@@ -67,11 +72,7 @@ public class CameraService extends MicroService {
 
         subscribeBroadcast(CrashedBroadcast.class, crash -> {
             System.out.println(getName() + " received crash broadcast. Shutting down.");
-            ErrorDetails.getInstance().setError(
-                    crash.getError(),
-                    crash.getFaultySensor(),
-                    FusionSlam.getInstance().getPosesTill(crash.getTime())
-            );
+
             if(LastFrame.getInstance().getDetectedObjects().isEmpty())
                 LastFrame.getInstance().setDetectedObjects(camera.getDetectedObjectstill(crash.getTime()));
             terminate();

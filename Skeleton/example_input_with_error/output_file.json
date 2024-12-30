@@ -1,11 +1,11 @@
 {
-  "statistics": {
-    "systemRuntime": 30,
-    "numTrackedObjects": 13,
-    "numDetectedObjects": 13,
+  "Statistics": {
+    "systemRuntime": 21,
+    "numTrackedObjects": 9,
+    "numDetectedObjects": 9,
     "numLandmarks": 7
   },
-  "landmarks": {
+  "landMarks": {
     "Wall_4": {
       "id": "Wall_4",
       "description": "Wall",
@@ -53,12 +53,12 @@
       "description": "Wall",
       "coordinates": [
         {
-          "x": 0.4908953928360109,
-          "y": 0.12055924334093296
+          "x": -1.260438231426796,
+          "y": 3.124125914456589
         },
         {
-          "x": 0.3978103367934267,
-          "y": 0.12044636487120144
+          "x": -1.3038657317253883,
+          "y": 2.9438188258406823
         }
       ]
     },

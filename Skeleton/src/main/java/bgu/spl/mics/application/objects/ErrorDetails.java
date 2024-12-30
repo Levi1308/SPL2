@@ -17,20 +17,24 @@ public class ErrorDetails {
 
     // Private constructor for Singleton
     private ErrorDetails() {
-        this.error = null;
-        this.faultySensor = null;
-        this.poses = null;
-        this.lastFrames = LastFrame.getInstance();
+        reset();
     }
 
     public static synchronized ErrorDetails getInstance() {
         return ErrorDetailsHolder.INSTANCE;
     }
 
-    public void setError(String error, String faultySensor, List<Pose> poses) {
+    public synchronized void setError(String error, String faultySensor, List<Pose> poses) {
         this.error = error;
         this.faultySensor = faultySensor;
         this.poses = poses;
+    }
+
+    // Reset error details to null if no error occurs
+    public synchronized void reset() {
+        this.error = null;
+        this.faultySensor = null;
+        this.poses = null;
     }
 
     public String getError() {
@@ -41,13 +45,8 @@ public class ErrorDetails {
         return faultySensor;
     }
 
-    public String toJson() {
+    public synchronized String toJson() {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        if (error == null) {
-            // Return an empty JSON if no error exists
-            return "{}";
-        } else {
-            return gson.toJson(this);
-        }
+        return error == null ? "{}" : gson.toJson(this);
     }
 }

@@ -28,6 +28,10 @@ public class LiDarDataBase {
         cloudPoints = new ConcurrentLinkedQueue<>();
     }
 
+    public int sizeOfCloudPoints(){
+        return cloudPoints.size();
+    }
+
     public static synchronized LiDarDataBase getInstance() {
         return LidarDataBaseHolder.instance;
     }

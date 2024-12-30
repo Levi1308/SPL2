@@ -54,9 +54,8 @@ public class CameraService extends MicroService {
             sendDetectObjectsEvents();
 
             if (checkForSensorDisconnection()) {
-                List<String> faultySensors = List.of(getName());
-                System.err.println(getName() + " detected sensor disconnection. Broadcasting CrashedBroadcast.");
-                sendBroadcast(new CrashedBroadcast("Camera disconnected", faultySensors));
+                sendBroadcast(new CrashedBroadcast(tickBroadcast.getTick(),"camera disconnected","Camera"+camera.getId()));
+                LastFrame.getInstance().setDetectedObjects(camera.getDetectedObjectstill(tickBroadcast.getTick()));
                 terminate();
             }
         });
@@ -67,8 +66,16 @@ public class CameraService extends MicroService {
         });
 
         subscribeBroadcast(CrashedBroadcast.class, crash -> {
-            System.err.println(getName() + " received CrashedBroadcast: " + crash.getError());
+            System.out.println(getName() + " received crash broadcast. Shutting down.");
+            ErrorDetails.getInstance().setError(
+                    crash.getError(),
+                    crash.getFaultySensor(),
+                    FusionSlam.getInstance().getPosesTill(crash.getTime())
+            );
+            if(LastFrame.getInstance().getDetectedObjects().isEmpty())
+                LastFrame.getInstance().setDetectedObjects(camera.getDetectedObjectstill(crash.getTime()));
             terminate();
+
         });
 
         System.out.println(getName() + " initialized and ready to process TickBroadcasts.");
@@ -87,24 +94,22 @@ public class CameraService extends MicroService {
         if (tickDifference >= camera.getFrequency()) {
             List<DetectedObject> detectedObjects = camera.getDetectedObjects(camera.getTick());
             DetectedObject error=AnErrorOccured(detectedObjects);
-            if(error!=null)
+            if(error==null)
             {
-            if (!detectedObjects.isEmpty()) {
-                System.out.println("Camera " + camera.getId() + " detected " + detectedObjects.size() + " objects at tick " + camera.getTick());
-                sendEvent(new DetectObjectsEvent(detectedObjects, this.camera.getTick()));
-                lastEventTick = camera.getTick();
-                camera.addDetectedObjects(detectedObjects, camera.getTick());
+                if (!detectedObjects.isEmpty()) {
+                    System.out.println("Camera " + camera.getId() + " detected " + detectedObjects.size() + " objects at tick " + camera.getTick());
+                    sendEvent(new DetectObjectsEvent(detectedObjects, this.camera.getTick()));
+                    lastEventTick = camera.getTick();
+                    camera.addDetectedObjects(detectedObjects, camera.getTick());
 
-                System.out.println("DetectObjectsEvent sent by Camera " + camera.getId() + " at tick " + camera.getTick());
-            } else {
-                System.out.println("Camera " + camera.getId() + " detected no objects at tick " + camera.getTick());
+                    System.out.println("DetectObjectsEvent sent by Camera " + camera.getId() + " at tick " + camera.getTick());
+                } else {
+                    System.out.println("Camera " + camera.getId() + " detected no objects at tick " + camera.getTick());
+                }
             }
-        }
             else
             {
-                List<String> faultySensors=new ArrayList<>();
-                faultySensors.add("Camera"+camera.getId());
-                sendBroadcast(new CrashedBroadcast(error.getDescription(),faultySensors));
+                sendBroadcast(new CrashedBroadcast(camera.getTick(),"camera disconnected","Camera"+camera.getId()));
                 terminate();
                 return;
             }
@@ -122,6 +127,8 @@ public class CameraService extends MicroService {
         }
         return null;
     }
+
+
 
 
 

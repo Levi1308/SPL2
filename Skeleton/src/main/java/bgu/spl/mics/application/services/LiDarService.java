@@ -41,8 +41,8 @@ public class LiDarService extends MicroService {
             int currentTick = broadcast.getTick();
             onTick(currentTick);
             if (checkForSensorDisconnection()) {
-                List<String> faultySensors = List.of(getName());
-                sendBroadcast(new CrashedBroadcast("LiDAR disconnected", faultySensors));
+                sendBroadcast(new CrashedBroadcast(currentTick,"LiDar disconnected","LiDar"+liDarTracker.getId()));
+                LastFrame.getInstance().setLidarCloudPoints(liDarTracker.getCloudPointstill(currentTick));
                 terminate();
             }
         });
@@ -51,6 +51,9 @@ public class LiDarService extends MicroService {
         });
         subscribeBroadcast(CrashedBroadcast.class, crash -> {
             System.out.println(getName() + " terminating due to error: " + crash.getError());
+            if(LastFrame.getInstance().getLidarCloudPoints().isEmpty()){
+                LastFrame.getInstance().setLidarCloudPoints(liDarTracker.getCloudPointstill(crash.getTime()));
+            }
             onTerminate();
         });
         subscribeEvent(DetectObjectsEvent.class, (DetectObjectsEvent event) -> {
@@ -100,8 +103,8 @@ public class LiDarService extends MicroService {
             }
 
             if (object.getId().equals("ERROR")) {
-                List<String> faultySensors = List.of(getName());
-                sendBroadcast(new CrashedBroadcast(object.getDescription(), faultySensors));
+                String faultySensor = "LiDar Dissconnected";
+                sendBroadcast(new CrashedBroadcast(currentTime,object.getDescription(), faultySensor));
                 terminate();
                 return;
             }
@@ -112,6 +115,7 @@ public class LiDarService extends MicroService {
             sendEvent(new TrackedObjectsEvent(trackedObjects));
         }
     }
+
 
 
 }

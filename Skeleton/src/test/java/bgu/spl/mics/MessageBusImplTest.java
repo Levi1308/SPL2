@@ -78,7 +78,12 @@ class MessageBusImplTest {
     void sendBroadcast() {
         messageBus.subscribeBroadcast(CrashedBroadcast.class, cameraService);
         // Test sending a broadcast
-        CrashedBroadcast broadcast = new CrashedBroadcast("Error occurred", new ArrayList<>());
+        CrashedBroadcast broadcast = new CrashedBroadcast(
+                2,
+                "Error occurred",
+                "Camera1"
+        );
+
         messageBus.sendBroadcast(broadcast);
 
         // Verify the broadcast is received by all subscribers
@@ -110,13 +115,14 @@ class MessageBusImplTest {
         messageBus.unregister(cameraService);
         assertFalse(messageBus.getQueues().containsKey(cameraService));
     }
-    /*
+
     @Test
     void awaitMessage() throws InterruptedException {
-        // Test waiting for a message
-        messageBus.subscribeBroadcast(TickBroadcast.class, liDarService);
-        TickBroadcast tickBroadcast = new TickBroadcast(2);
+        // Register cameraService before subscribing or waiting for messages
+        messageBus.register(cameraService);
+        messageBus.subscribeBroadcast(TickBroadcast.class, cameraService);
 
+        TickBroadcast tickBroadcast = new TickBroadcast(2);
         messageBus.sendBroadcast(tickBroadcast);
 
         // Simulate awaiting the message
@@ -125,5 +131,6 @@ class MessageBusImplTest {
         // Assert that the correct message was received
         assertEquals(TickBroadcast.class, message.getClass());
     }
-    */
+
+
 }

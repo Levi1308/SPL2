@@ -34,6 +34,16 @@ public class GurionRockRunner {
             System.err.println("Failed to save simulation results.");
         }
     }
+    public static void saveErrorFile(ErrorDetails errorDetails, String outputPath) {
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        try (FileWriter writer = new FileWriter(outputPath)) {
+            gson.toJson(errorDetails, writer);
+            System.out.println("Error details saved to: " + outputPath);
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.err.println("Failed to save error details.");
+        }
+    }
     /**
      * The main method of the simulation.
      * This method sets up the necessary components, parses configuration files,
@@ -70,7 +80,8 @@ public class GurionRockRunner {
             JsonArray camerasConfigurations = cameras.getAsJsonArray("CamerasConfigurations");
             String cameraDataPath = cameras.get("camera_datas_path").getAsString();
             String path=parentDir.concat(cameraDataPath);
-            path=path.replaceFirst("[.]","");
+            path = parentDir + File.separator + cameraDataPath.replaceFirst("^\\.", "");
+
 
             ReaderJsonCamera readerCamera=new ReaderJsonCamera(path);
 
@@ -100,7 +111,7 @@ public class GurionRockRunner {
             JsonArray lidarConfigurations = lidarWorkers.getAsJsonArray("LidarConfigurations");
             String lidarDataPath = lidarWorkers.get("lidars_data_path").getAsString();
             path=parentDir.concat(lidarDataPath);
-            path=path.replaceFirst("[.]","");
+            path = parentDir + File.separator + lidarDataPath.replaceFirst("^\\.", "");
             LiDarDataBase liDarDataBase=LiDarDataBase.getInstance();
             liDarDataBase.loadData(path);
 
@@ -124,7 +135,7 @@ public class GurionRockRunner {
 
             String poseJsonFile = configObject.get("poseJsonFile").getAsString();
             path=parentDir.concat(poseJsonFile);
-            path=path.replaceFirst("[.]","");
+            path = parentDir + File.separator + poseJsonFile.replaceFirst("^\\.", "");
             ReaderJsonPose readerJsonPose=new ReaderJsonPose(path);
 
             //System.out.println(readerJsonPose.toString());
@@ -139,7 +150,7 @@ public class GurionRockRunner {
 
 
             TimeService timeService=new TimeService(tickTime,duration);
-            FusionSlamService fusionSlamService=new FusionSlamService(new FusionSlam());
+            FusionSlamService fusionSlamService=new FusionSlamService(FusionSlam.getInstance());
             Thread fusionSlamThread = new Thread(fusionSlamService);
             threads.add(fusionSlamThread);
             fusionSlamThread.start();
@@ -160,9 +171,25 @@ public class GurionRockRunner {
             }
 
 
-            SimulationOutput output = new SimulationOutput(StatisticalFolder.getInstance(),fusionSlamService.getFusionSlam().getLandmarks() , null);
-            String outputPath = parentDir + File.separator + "output.json";
-            saveOutputFile(output, outputPath);
+            if (ErrorDetails.getInstance().getError() != null) {
+                // Write error to error_output.json
+                saveErrorFile(ErrorDetails.getInstance(), parentDir + File.separator +"error_output.json");
+                // Create empty output_file.json
+                try (FileWriter writer = new FileWriter("output_file.json")) {
+                    writer.write("{}");
+                }
+            } else {
+                // Write simulation output to output_file.json
+                SimulationOutput output = new SimulationOutput(FusionSlam.getInstance().getLandmarks());
+                saveOutputFile(output, parentDir + File.separator + "output_file.json");
+                // Create empty error_output.json
+                try (FileWriter writer = new FileWriter(parentDir + File.separator +"error_output.json")) {
+                    writer.write("{}");
+                }
+            }
+
+
+
         } catch (IOException e) {
             System.out.println("Reached exeption");
         }

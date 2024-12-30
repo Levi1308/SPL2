@@ -66,4 +66,13 @@ public class LiDarWorkerTracker {
     }
 
 
+    public List<CloudPoint> getCloudPointstill(int currentTick) {
+        List<CloudPoint> cloudPoints=new ArrayList<>();
+        for(TrackedObject obj:lastTrackedobjects){
+            if(obj.getTime()<=currentTick){
+                cloudPoints.addAll(obj.getCoordinate());
+            }
+        }
+        return cloudPoints;
+    }
 }

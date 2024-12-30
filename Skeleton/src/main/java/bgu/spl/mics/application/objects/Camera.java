@@ -45,9 +45,7 @@ public class Camera {
         }
     }
 
-    public void handleError(){
-        this.status = STATUS.ERROR;
-    }
+
 
     public STATUS getStatus(){return this.status;}
 
@@ -77,6 +75,16 @@ public class Camera {
             return new ArrayList<>();
         }
         return stampedObjects.getDetectedObjects();
+    }
+
+    public List<DetectedObject> getDetectedObjectstill(int tick) {
+        List<DetectedObject> output =new ArrayList<>();
+        for(StampedDetectedObjects stampedObjects : detectedObjectsMap.values()) {
+            if(stampedObjects.getTime()<=tick) {
+                output.addAll(stampedObjects.getDetectedObjects());
+            }
+        }
+        return output;
     }
 
 

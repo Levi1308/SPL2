@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Manages the fusion of sensor data for simultaneous localization and mapping (SLAM).
@@ -12,23 +11,21 @@ import java.util.concurrent.locks.ReentrantLock;
  * Implements the Singleton pattern to ensure a single instance of FusionSlam exists.
  */
 public class FusionSlam {
-    private static class FusionSlamHolder{
-        private static FusionSlam INSTANCE = new FusionSlam();
-    }
+    private static FusionSlam instance;
     private Pose currentPose;
     private Map<String, LandMark> landmarks;
-    private Map<Integer, Pose> Poses;
+    private Map<Integer,Pose> Poses;
     private int Tick;
     private StatisticalFolder statisticalFolder = StatisticalFolder.getInstance();
-    private final ReentrantLock lock = new ReentrantLock();
+
 
     /**
      * Constructor for FusionSlam.
      * Initializes empty lists for landmarks and tracked objects.
      */
-    private FusionSlam() {
-        this.currentPose = new Pose(0, 0, 0, 0);
-        this.landmarks = new HashMap<>();
+    public FusionSlam() {
+        this.currentPose = new Pose(0, 0, 0,0);
+        this.landmarks =  new HashMap<>();
         this.Poses = new HashMap<>();
         this.Tick = 0;
     }
@@ -37,122 +34,77 @@ public class FusionSlam {
      * Returns the singleton instance of FusionSlam.
      */
     public static FusionSlam getInstance() {
-        return FusionSlamHolder.INSTANCE;
+        if (instance == null) {
+            instance = new FusionSlam();
+        }
+        return instance;
     }
 
     public void setTick(int tick) {
-        lock.lock();
-        try {
-            this.Tick = tick;
-        } finally {
-            lock.unlock();
-        }
+        this.Tick = tick;
     }
+    public int getTick() {return this.Tick;}
 
-    public int getTick() {
-        lock.lock();
-        try {
-            return this.Tick;
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    public Pose getCurrentPose() {
-        lock.lock();
-        try {
-            return this.currentPose;
-        } finally {
-            lock.unlock();
-        }
-    }
+    public Pose getCurrentPose() {return this.currentPose;}
 
     public void setCurrentPose(Pose currentPose) {
-        lock.lock();
-        try {
-            this.currentPose = currentPose;
-        } finally {
-            lock.unlock();
-        }
+        this.currentPose = currentPose;
     }
 
-    public Map<String, LandMark> getLandmarks() {
-        lock.lock();
-        try {
-            return new HashMap<>(this.landmarks);  // Return a copy to avoid concurrency issues
-        } finally {
-            lock.unlock();
-        }
+    public synchronized Map<String, LandMark> getLandmarks() {
+        return new HashMap<>(this.landmarks);  // Return a copy to avoid concurrency issues
     }
+
 
     public HashMap<Integer, Pose> getPoses() {
-        lock.lock();
-        try {
-            return new HashMap<>(this.Poses);
-        } finally {
-            lock.unlock();
-        }
+        return new HashMap<>(this.Poses);
     }
 
     public Pose addPose(Pose pose) {
-        lock.lock();
-        try {
-            this.Poses.put(pose.getTime(), pose);
-            this.currentPose = pose;
-            return pose;
-        } finally {
-            lock.unlock();
-        }
+        this.Poses.put(pose.getTime(), pose);
+        this.currentPose = pose;
+        return pose;
     }
-
-    public List<Pose> getPosesTill(int tick) {
-        lock.lock();
-        try {
-            List<Pose> poses = new ArrayList<>();
-            for (Pose pose : this.Poses.values()) {
-                if (tick >= pose.getTime()) {
-                    poses.add(pose);
-                }
+    public List<Pose> getPosesTill(int tick){
+        List<Pose> poses = new ArrayList<>();
+        for(Pose pose : this.Poses.values()){
+            if(tick >= pose.getTime()){
+                poses.add(pose);
             }
-            return poses;
-        } finally {
-            lock.unlock();
         }
+        return poses;
     }
 
     public void doMapping(List<TrackedObject> trackedObjects) {
-        lock.lock();
-        try {
-            for (TrackedObject obj : trackedObjects) {
-                if (obj.getCoordinate() == null || obj.getCoordinate().isEmpty()) {
-                    System.out.println("TrackedObject " + obj.getId() + " has no coordinates.");
-                    continue;
-                }
-
-                Pose mappingPose = getPoses().get(obj.getTime());
-                if (mappingPose == null) {
-                    System.out.println("No matching pose for tracked object " + obj.getId() + " at tick " + obj.getTime());
-                    continue;
-                }
-
-                List<CloudPoint> globalPoints = convertToGlobal(obj.getCoordinate(), mappingPose);
-                String id = obj.getId();
-
-                if (landmarks.containsKey(id)) {
-                    System.out.println("Updating landmark " + id);
-                    LandMark existingLandmark = landmarks.get(id);
-                    existingLandmark.UpdateCoordinates(globalPoints);
-                } else {
-                    System.out.println("Adding new landmark " + id);
-                    LandMark newLandmark = new LandMark(id, obj.getDescription(), globalPoints);
-                    landmarks.put(id, newLandmark);
-                    statisticalFolder.incrementLandmarks(1);
-                }
+        for (TrackedObject obj : trackedObjects) {
+            if (obj.getCoordinate() == null || obj.getCoordinate().isEmpty()) {
+                System.out.println("TrackedObject " + obj.getId() + " has no coordinates.");
+                continue;
             }
-        } finally {
-            lock.unlock();
+
+            Pose mappingPose = getPoses().get(obj.getTime());
+            if (mappingPose == null) {
+                System.out.println("No matching pose for tracked object " + obj.getId() + " at tick " + obj.getTime());
+                continue;
+            }
+
+            List<CloudPoint> globalPoints = convertToGlobal(obj.getCoordinate(), mappingPose);
+            String id = obj.getId();
+
+            if (landmarks.containsKey(id)) {
+                System.out.println("Updating landmark " + id);
+                LandMark existingLandmark = landmarks.get(id);
+                existingLandmark.UpdateCoordinates(globalPoints);
+            } else {
+                System.out.println("Adding new landmark " + id);
+                LandMark newLandmark = new LandMark(id, obj.getDescription(), globalPoints);
+                landmarks.put(id, newLandmark);
+                statisticalFolder.incrementLandmarks(1);
+            }
         }
     }
+
+
 
     /**
      * Converts local LiDAR coordinates to the global coordinate system.
@@ -168,7 +120,11 @@ public class FusionSlam {
             double globalX = cosTheta * point.getX() - sinTheta * point.getY() + pose.getX();
             double globalY = sinTheta * point.getX() + cosTheta * point.getY() + pose.getY();
             globalPoints.add(new CloudPoint(globalX, globalY));
+
+            System.out.println("Converted local point (" + point.getX() + ", " + point.getY() + ") " +
+                    "to global point (" + globalX + ", " + globalY + ")" + " with pose: " + pose.getX() + ", " + pose.getY() );
         }
         return globalPoints;
     }
+
 }

@@ -4,22 +4,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class LastFrame {
-    private static class LastFrameHolder{
-        private static LastFrame instance = new LastFrame();
-    }
+
     private List<DetectedObject> detectedObjects;
     private List<CloudPoint> lidarCloudPoints;
 
 
 
-    private LastFrame() {
+    public LastFrame() {
         this.detectedObjects = new ArrayList<>();
         this.lidarCloudPoints = new ArrayList<>();
 
     }
-    public static LastFrame getInstance(){
-        return LastFrameHolder.instance;
-    }
+
 
     public synchronized List<DetectedObject> getDetectedObjects() {
         return detectedObjects;
@@ -29,15 +25,15 @@ public class LastFrame {
         return lidarCloudPoints;
     }
 
-
-
-    public synchronized void setDetectedObjects(List<DetectedObject> detectedObjects) {
-        this.detectedObjects = detectedObjects;
+    public synchronized void addDetectedObject(List<DetectedObject> detectedObject){
+        detectedObjects.addAll(detectedObject);
     }
 
-    public synchronized void setLidarCloudPoints(List<CloudPoint> lidarCloudPoints) {
-        this.lidarCloudPoints = lidarCloudPoints;
+    public synchronized void addLidarCloudPoint(List<CloudPoint> cloudPoint){
+        lidarCloudPoints.addAll(cloudPoint);
     }
+
+
 
 }
 

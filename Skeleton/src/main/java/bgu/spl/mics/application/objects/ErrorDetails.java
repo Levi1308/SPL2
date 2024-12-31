@@ -2,8 +2,12 @@ package bgu.spl.mics.application.objects;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.annotations.Expose;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ErrorDetails {
     private static class ErrorDetailsHolder {
@@ -12,8 +16,17 @@ public class ErrorDetails {
 
     private volatile String error;
     private volatile String faultySensor;
-    private LastFrame lastFrames;
+
+    @Expose
+    private Map<String, StampedDetectedObjects> lastCamerasFrame = new HashMap<>();
+
+    @Expose
+    private Map<String, List<TrackedObject>> lastLiDarWorkerTrackersFrame = new HashMap<>();
+
+    @Expose
     private List<Pose> poses;
+    @Expose
+    private SimulationOutput simulationOutput;
 
     // Private constructor for Singleton
     private ErrorDetails() {
@@ -28,14 +41,25 @@ public class ErrorDetails {
         this.error = error;
         this.faultySensor = faultySensor;
         this.poses = poses;
-        this.lastFrames = LastFrame.getInstance();
     }
 
-    // Reset error details to null if no error occurs
+    public synchronized void addLastCameraFrame(String id, StampedDetectedObjects detectedObjects) {
+        lastCamerasFrame.put(id, detectedObjects);
+
+    }
+
+    public synchronized void addLastLiDarFrame(String lidarId, List<TrackedObject> trackedObjects) {
+        if (trackedObjects != null && !trackedObjects.isEmpty()) {
+            lastLiDarWorkerTrackersFrame.put(lidarId, trackedObjects);
+        }
+    }
+
     public synchronized void reset() {
         this.error = null;
         this.faultySensor = null;
         this.poses = null;
+        this.lastCamerasFrame.clear();
+        this.lastLiDarWorkerTrackersFrame.clear();
     }
 
     public String getError() {
@@ -47,7 +71,14 @@ public class ErrorDetails {
     }
 
     public String toJson() {
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        Gson gson = new GsonBuilder()
+                .excludeFieldsWithoutExposeAnnotation()
+                .setPrettyPrinting()
+                .create();
         return error == null ? "{}" : gson.toJson(this);
+    }
+
+    public void serSimulationOutput(SimulationOutput simulationOutput) {
+        this.simulationOutput = simulationOutput;
     }
 }

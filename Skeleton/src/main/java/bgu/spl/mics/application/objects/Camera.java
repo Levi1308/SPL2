@@ -62,10 +62,11 @@ public class Camera {
         return frequency;
     }
 
-    public void setDetectedObjectsMap(Map<Integer, StampedDetectedObjects> detectedObjectsMap) {
+    public void setDetectedObjectsMap(Map<Integer, StampedDetectedObjects> detectedObjectsMap,int numberObjects) {
         lock.lock();
         try {
             this.detectedObjectsMap = new ConcurrentHashMap<>(detectedObjectsMap);
+            this.numberObjects=numberObjects;
         } finally {
             lock.unlock();
         }
@@ -87,7 +88,6 @@ public class Camera {
             if (stampedObjects == null) {
                 return new ArrayList<>();
             }
-            statisticalFolder.incrementDetectedObjects(stampedObjects.getDetectedObjects().size());
             return stampedObjects.getDetectedObjects();
         } finally {
             lock.unlock();
@@ -112,6 +112,8 @@ public class Camera {
 
     public List<DetectedObject> onTick() {
         List<DetectedObject> detectedObjects = getDetectedObjects(getTick() - getFrequency());
+        statisticalFolder.incrementDetectedObjects(detectedObjects.size());
+        numberObjects-=detectedObjects.size();
         DetectedObject error = AnErrorOccured(detectedObjects);
         if(error!=null)
         {

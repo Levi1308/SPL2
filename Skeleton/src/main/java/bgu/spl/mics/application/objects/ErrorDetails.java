@@ -10,8 +10,8 @@ public class ErrorDetails {
         private static final ErrorDetails INSTANCE = new ErrorDetails();
     }
 
-    private String error;
-    private String faultySensor;
+    private volatile String error;
+    private volatile String faultySensor;
     private LastFrame lastFrames;
     private List<Pose> poses;
 
@@ -28,6 +28,7 @@ public class ErrorDetails {
         this.error = error;
         this.faultySensor = faultySensor;
         this.poses = poses;
+        this.lastFrames = LastFrame.getInstance();
     }
 
     // Reset error details to null if no error occurs
@@ -45,7 +46,7 @@ public class ErrorDetails {
         return faultySensor;
     }
 
-    public synchronized String toJson() {
+    public String toJson() {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         return error == null ? "{}" : gson.toJson(this);
     }

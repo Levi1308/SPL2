@@ -1,12 +1,10 @@
 package bgu.spl.mics.application.objects;
 
-import bgu.spl.mics.Future;
-import bgu.spl.mics.application.messages.DetectObjectsEvent;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Represents a camera sensor on the robot.
@@ -16,16 +14,16 @@ import java.util.Map;
 public class Camera {
     private final int id;
     private final int frequency;
-    private Map<Integer,StampedDetectedObjects> detectedObjectsMap;
+    private Map<Integer, StampedDetectedObjects> detectedObjectsMap;
     private STATUS status;
     private int tick;
+    private final ReentrantLock lock = new ReentrantLock();
     private StatisticalFolder statisticalFolder = StatisticalFolder.getInstance();
-
 
     public Camera(int id, int frequency) {
         this.id = id;
         this.frequency = frequency;
-        this.detectedObjectsMap = new HashMap<Integer ,StampedDetectedObjects >();
+        this.detectedObjectsMap = new HashMap<>();
         this.status = STATUS.UP;
         tick = 0;
     }
@@ -37,21 +35,44 @@ public class Camera {
      * @param tick            The tick at which the objects were detected.
      */
     public void addDetectedObjects(List<DetectedObject> detectedObjects, int tick) {
-        if (!detectedObjects.isEmpty()) {
-            StampedDetectedObjects stamped = new StampedDetectedObjects(tick,detectedObjects);
-            detectedObjectsMap.put(tick, stamped);
-            statisticalFolder.incrementDetectedObjects(stamped.getDetectedObjects().size());
-
+        lock.lock();
+        try {
+            if (!detectedObjects.isEmpty()) {
+                StampedDetectedObjects stamped = new StampedDetectedObjects(tick, detectedObjects);
+                detectedObjectsMap.put(tick, stamped);
+                statisticalFolder.incrementDetectedObjects(stamped.getDetectedObjects().size());
+            }
+        } finally {
+            lock.unlock();
         }
     }
 
+    public STATUS getStatus() {
+        lock.lock();
+        try {
+            return this.status;
+        } finally {
+            lock.unlock();
+        }
+    }
 
+    public int getTick() {
+        lock.lock();
+        try {
+            return this.tick;
+        } finally {
+            lock.unlock();
+        }
+    }
 
-    public STATUS getStatus(){return this.status;}
-
-    public int getTick(){return this.tick;}
-
-    public void setTick(int tick){this.tick = tick;}
+    public void setTick(int tick) {
+        lock.lock();
+        try {
+            this.tick = tick;
+        } finally {
+            lock.unlock();
+        }
+    }
 
     public int getId() {
         return id;
@@ -61,32 +82,49 @@ public class Camera {
         return frequency;
     }
 
-    public void setDetectedObjectsMap(Map<Integer,StampedDetectedObjects> detectedObjectsMap) {
-        this.detectedObjectsMap = detectedObjectsMap;
+    public void setDetectedObjectsMap(Map<Integer, StampedDetectedObjects> detectedObjectsMap) {
+        lock.lock();
+        try {
+            this.detectedObjectsMap = detectedObjectsMap;
+        } finally {
+            lock.unlock();
+        }
     }
 
-    public Map<Integer,StampedDetectedObjects> getStampedDetectedObjectsMap() {
-        return detectedObjectsMap;
+    public Map<Integer, StampedDetectedObjects> getStampedDetectedObjectsMap() {
+        lock.lock();
+        try {
+            return new HashMap<>(detectedObjectsMap);  // Return a copy to avoid exposing internal state
+        } finally {
+            lock.unlock();
+        }
     }
 
     public List<DetectedObject> getDetectedObjects(int tick) {
-        StampedDetectedObjects stampedObjects = detectedObjectsMap.get(tick);
-        if (stampedObjects == null) {
-            return new ArrayList<>();
+        lock.lock();
+        try {
+            StampedDetectedObjects stampedObjects = detectedObjectsMap.get(tick);
+            if (stampedObjects == null) {
+                return new ArrayList<>();
+            }
+            return stampedObjects.getDetectedObjects();
+        } finally {
+            lock.unlock();
         }
-        return stampedObjects.getDetectedObjects();
     }
 
     public List<DetectedObject> getDetectedObjectstill(int tick) {
-        List<DetectedObject> output =new ArrayList<>();
-        for(StampedDetectedObjects stampedObjects : detectedObjectsMap.values()) {
-            if(stampedObjects.getTime()<=tick) {
-                output.addAll(stampedObjects.getDetectedObjects());
+        lock.lock();
+        try {
+            List<DetectedObject> output = new ArrayList<>();
+            for (StampedDetectedObjects stampedObjects : detectedObjectsMap.values()) {
+                if (stampedObjects.getTime() <= tick) {
+                    output.addAll(stampedObjects.getDetectedObjects());
+                }
             }
+            return output;
+        } finally {
+            lock.unlock();
         }
-        return output;
     }
-
-
-
 }

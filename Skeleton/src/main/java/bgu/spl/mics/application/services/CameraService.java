@@ -75,6 +75,9 @@ public class CameraService extends MicroService {
 
             if(LastFrame.getInstance().getDetectedObjects().isEmpty())
                 LastFrame.getInstance().setDetectedObjects(camera.getDetectedObjectstill(crash.getTime()));
+            if (ErrorDetails.getInstance().getError()==null){
+                ErrorDetails.getInstance().setError(crash.getError(), crash.getFaultySensor(), FusionSlam.getInstance().getPosesTill(crash.getTime()));
+            }
             terminate();
 
         });
@@ -92,7 +95,7 @@ public class CameraService extends MicroService {
      */
     private void sendDetectObjectsEvents() {
         int tickDifference = camera.getTick() - lastEventTick;
-        if (tickDifference >= camera.getFrequency()) {
+        if (tickDifference == camera.getFrequency()) {
             List<DetectedObject> detectedObjects = camera.getDetectedObjects(camera.getTick());
             DetectedObject error=AnErrorOccured(detectedObjects);
             if(error==null)
@@ -111,7 +114,6 @@ public class CameraService extends MicroService {
             else
             {
                 sendBroadcast(new CrashedBroadcast(camera.getTick(),"camera disconnected","Camera"+camera.getId()));
-                terminate();
                 return;
             }
 

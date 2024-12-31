@@ -20,12 +20,12 @@ import java.util.Map;
 public class ReaderJsonCamera {
     String path;
     Map<String,Map<Integer, StampedDetectedObjects>> cameras;
-
+    Map<String,Integer> numberObject;
 
     public ReaderJsonCamera(String path) {
         this.path = path;
         cameras = new HashMap<>();
-
+        numberObject=new HashMap<>();
         loadData();
     }
 
@@ -47,6 +47,7 @@ public class ReaderJsonCamera {
                 String cameraKey = cameraEntry.getKey();
                 Map<Integer, StampedDetectedObjects> stampedDetectedObjects=new HashMap<>();
                 JsonArray cameraEntries = cameraEntry.getValue().getAsJsonArray();
+                numberObject.put(cameraKey,0);
                 for (JsonElement entryElement : cameraEntries) {
                     JsonObject entry = entryElement.getAsJsonObject();
                     int time = entry.get("time").getAsInt();
@@ -58,6 +59,7 @@ public class ReaderJsonCamera {
                         String description = detectedObject.get("description").getAsString();
                         DetectedObject obj = new DetectedObject(id, description);
                         detectedObjectList.add(obj);
+                        numberObject.put(cameraKey, numberObject.get(cameraKey) + 1);
                     }
                     StampedDetectedObjects stampedobj = stampedDetectedObjects.getOrDefault(time, null);
                     if (stampedobj != null) {
@@ -77,6 +79,10 @@ public class ReaderJsonCamera {
 
     public Map<Integer,StampedDetectedObjects> getStampedDetectedObjects(String camera) {
         return cameras.get(camera);
+    }
+
+    public Integer getNumberObject(String camera) {
+        return numberObject.get(camera);
     }
 
     @Override

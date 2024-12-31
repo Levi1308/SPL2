@@ -5,18 +5,26 @@ import java.util.List;
 
 public class CrashedBroadcast implements Broadcast {
     private final String error;
-    private final List<String> faultySensors;
+    private final String faultySensor;
+    private final int time;
 
-    public CrashedBroadcast(String error, List<String> faultySensors) {
+    public CrashedBroadcast(int time, String error, String faultySensor ) {
+        this.time = time;
         this.error = error;
-        this.faultySensors = faultySensors;
+        this.faultySensor = faultySensor;
     }
 
     public String getError() {
         return error;
     }
 
-    public List<String> getFaultySensors() {
-        return faultySensors;
+    public String getFaultySensor() {
+        return faultySensor;
     }
+
+    public int getTime() {
+        return time;
+    }
+
+
 }

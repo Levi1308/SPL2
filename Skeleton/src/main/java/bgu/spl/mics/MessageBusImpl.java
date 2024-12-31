@@ -32,12 +32,15 @@ public class MessageBusImpl implements MessageBus {
     private Map<Class<? extends Broadcast>, List<MicroService>> broadcastSubscribers;
     private Map<MicroService, Queue<Message>> queues;
     private Map<Event, Future> eventFutures;
-
+    protected int numberofSensors;
+    protected int numberofTerminated;
     private MessageBusImpl() {
         this.eventSubscribers = new HashMap<>();
         this.broadcastSubscribers = new HashMap<>();
         this.queues = new HashMap<>();
         this.eventFutures = new HashMap<>();
+        numberofSensors=0;
+        numberofTerminated=0;
     }
 
     public static synchronized MessageBusImpl getInstance() {
@@ -108,6 +111,7 @@ public class MessageBusImpl implements MessageBus {
 		if (queues.putIfAbsent(m, new LinkedList<>()) != null) {
 			System.err.println("Service already registered: " + m.getName());
 		} else {
+            numberofSensors++;
 			System.out.println("Service registered successfully: " + m.getName());
 		}
 	}
@@ -116,6 +120,7 @@ public class MessageBusImpl implements MessageBus {
 	@Override
     public synchronized void unregister(MicroService m) {
         queues.remove(m);
+        numberofTerminated++;
         eventSubscribers.values().forEach(list -> list.remove(m));
         broadcastSubscribers.values().forEach(list -> list.remove(m));
 
@@ -145,5 +150,13 @@ public class MessageBusImpl implements MessageBus {
 
     public Map<MicroService, Queue<Message>> getQueues() {
         return queues;
+    }
+
+    public int getNumberofSensors() {
+        return numberofSensors;
+    }
+
+    public int getNumberofTerminated() {
+        return numberofTerminated;
     }
 }

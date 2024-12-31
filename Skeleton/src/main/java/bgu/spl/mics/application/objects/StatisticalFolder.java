@@ -1,4 +1,6 @@
 package bgu.spl.mics.application.objects;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Holds statistical information about the system's operation.
@@ -14,7 +16,9 @@ public class StatisticalFolder {
     private final AtomicInteger numDetectedObjects;
     private final AtomicInteger numLandmarks;
 
-    public StatisticalFolder() {
+
+
+    private StatisticalFolder() {
         this.systemRuntime = new AtomicInteger(0);
         this.numTrackedObjects = new AtomicInteger(0);
         this.numDetectedObjects = new AtomicInteger(0);
@@ -104,4 +108,6 @@ public class StatisticalFolder {
         this.numDetectedObjects.set(0);
         this.numLandmarks.set(0);
     }
+
+
 }

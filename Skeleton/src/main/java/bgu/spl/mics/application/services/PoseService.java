@@ -30,7 +30,9 @@ import java.util.List;
  */
 public class PoseService extends MicroService {
  private GPSIMU gpsimu;
- List<Pose> poses;
+ private List<Pose> poses;
+ private int sizePoses;
+
     public PoseService(GPSIMU gpsimu) {
         super("PoseService");
         this.gpsimu=gpsimu;
@@ -39,6 +41,7 @@ public class PoseService extends MicroService {
 
     public void setPoses(List<Pose> poses) {
         this.poses = poses;
+        sizePoses=poses.size();
     }
 
     @Override
@@ -55,24 +58,38 @@ public class PoseService extends MicroService {
             terminate();
         });
 
+        subscribeBroadcast(CrashedBroadcast.class, (CrashedBroadcast broadcast) -> {
+            System.out.println("PoseService received CrashedBroadcast. Terminating.");
+            terminate();
+        });
+
         System.out.println(getName() + " initialized and waiting for ticks.");
     }
 
 
+
     public void onTick(int currentTick) {
-        gpsimu.setCurrentTick(currentTick);
-        Pose temp;
-        if (currentTick < poses.size()) {
-            temp = poses.get(currentTick);
-        } else {
-            // Use the last pose repeatedly
-            temp = poses.get(poses.size() - 1);
-            System.out.println("Repeating last pose at tick " + currentTick);
+        if (sizePoses != 0) {
+            gpsimu.setCurrentTick(currentTick);
+            Pose temp;
+            if (currentTick < poses.size()) {
+                temp = poses.get(currentTick);
+                sizePoses--;
+            } else {
+                // Use the last pose repeatedly
+                temp = poses.get(poses.size() - 1);
+                System.out.println("Repeating last pose at tick " + currentTick);
+            }
+
+            gpsimu.addPose(temp);
+            PoseEvent poseEvent = new PoseEvent(temp);
+            sendEvent(poseEvent);
+            System.out.println("Pose sent at tick " + currentTick);
         }
-        gpsimu.addPose(temp);
-        PoseEvent poseEvent = new PoseEvent(temp);
-        sendEvent(poseEvent);
-        System.out.println("Pose sent at tick " + currentTick);
+        else {
+            System.out.println("All Pose detected. terminating at tick" + currentTick);
+            terminate();
+        }
     }
 
 

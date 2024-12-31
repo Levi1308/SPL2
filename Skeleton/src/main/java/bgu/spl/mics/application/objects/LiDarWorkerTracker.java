@@ -55,15 +55,20 @@ public class LiDarWorkerTracker {
     }
     public void addTrackedObject(TrackedObject obj){
         lastTrackedobjects.add(obj);
-        /*for(TrackedObject trackedObject:lastTrackedobjects)
-        {
-            if(trackedObject.getId()==obj.getId())
-                trackedObject.
-        }*/
+
     }
     private void processLiDARData(List<StampedCloudPoints> cloudPoints) {
 
     }
 
 
+    public List<CloudPoint> getCloudPointstill(int currentTick) {
+        List<CloudPoint> cloudPoints=new ArrayList<>();
+        for(TrackedObject obj:lastTrackedobjects){
+            if(obj.getTime()<=currentTick){
+                cloudPoints.addAll(obj.getCoordinate());
+            }
+        }
+        return cloudPoints;
+    }
 }

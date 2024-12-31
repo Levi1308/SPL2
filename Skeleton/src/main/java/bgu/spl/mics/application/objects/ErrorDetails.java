@@ -1,19 +1,52 @@
 package bgu.spl.mics.application.objects;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import java.util.List;
-import java.util.Map;
 
 public class ErrorDetails {
-    private String error;
-    private List<String> faultySensor;
-    private Map<String, List<DetectedObject>> lastFrames;
-    private List<Pose> poses;
-    private StatisticalFolder statistics = StatisticalFolder.getInstance();;
+    private static class ErrorDetailsHolder {
+        private static final ErrorDetails INSTANCE = new ErrorDetails();
+    }
 
-    public ErrorDetails(String error, List<String> faultySensor, Map<String, List<DetectedObject>> lastFrames, List<Pose> poses, StatisticalFolder statistics) {
+    private String error;
+    private String faultySensor;
+    private LastFrame lastFrames;
+    private List<Pose> poses;
+
+    // Private constructor for Singleton
+    private ErrorDetails() {
+        reset();
+    }
+
+    public static synchronized ErrorDetails getInstance() {
+        return ErrorDetailsHolder.INSTANCE;
+    }
+
+    public synchronized void setError(String error, String faultySensor, List<Pose> poses) {
         this.error = error;
         this.faultySensor = faultySensor;
-        this.lastFrames = lastFrames;
         this.poses = poses;
+    }
+
+    // Reset error details to null if no error occurs
+    public synchronized void reset() {
+        this.error = null;
+        this.faultySensor = null;
+        this.poses = null;
+    }
+
+    public String getError() {
+        return error;
+    }
+
+    public String getFaultySensor() {
+        return faultySensor;
+    }
+
+    public synchronized String toJson() {
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        return error == null ? "{}" : gson.toJson(this);
     }
 }

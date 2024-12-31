@@ -11,6 +11,9 @@ import java.util.Map;
  * Implements the Singleton pattern to ensure a single instance of FusionSlam exists.
  */
 public class FusionSlam {
+    private static class FusionSlamHolder{
+        private static FusionSlam INSTANCE = new FusionSlam();
+    }
     private Pose currentPose;
     private Map<String, LandMark> landmarks;
     private Map<Integer,Pose> Poses;
@@ -22,11 +25,18 @@ public class FusionSlam {
      * Constructor for FusionSlam.
      * Initializes empty lists for landmarks and tracked objects.
      */
-    public FusionSlam() {
+    private FusionSlam() {
         this.currentPose = new Pose(0, 0, 0,0);
         this.landmarks =  new HashMap<>();
         this.Poses = new HashMap<>();
         this.Tick = 0;
+    }
+
+    /**
+     * Returns the singleton instance of FusionSlam.
+     */
+    public static FusionSlam getInstance() {
+        return FusionSlamHolder.INSTANCE;
     }
 
     public void setTick(int tick) {
@@ -53,6 +63,16 @@ public class FusionSlam {
         this.Poses.put(pose.getTime(), pose);
         this.currentPose = pose;
         return pose;
+    }
+
+    public List<Pose> getPosesTill(int tick){
+        List<Pose> poses = new ArrayList<>();
+        for(Pose pose : this.Poses.values()){
+            if(tick >= pose.getTime()){
+                poses.add(pose);
+            }
+        }
+        return poses;
     }
 
     public void doMapping(List<TrackedObject> trackedObjects) {
@@ -101,11 +121,10 @@ public class FusionSlam {
             double globalY = sinTheta * point.getX() + cosTheta * point.getY() + pose.getY();
             globalPoints.add(new CloudPoint(globalX, globalY));
 
-            System.out.println("Converted local point (" + point.getX() + ", " + point.getY() + ") " +
-                    "to global point (" + globalX + ", " + globalY + ")" + " with pose: " + pose.getX() + ", " + pose.getY() );
+            //System.out.println("Converted local point (" + point.getX() + ", " + point.getY() + ") " +
+                   // "to global point (" + globalX + ", " + globalY + ")" + " with pose: " + pose.getX() + ", " + pose.getY() );
         }
         return globalPoints;
     }
 
 }
-

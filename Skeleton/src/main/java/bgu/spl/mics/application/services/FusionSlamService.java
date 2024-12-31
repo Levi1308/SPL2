@@ -43,7 +43,10 @@ public class FusionSlamService extends MicroService {
     @Override
     protected void initialize() {
         subscribeBroadcast(TickBroadcast.class, tickBroadcast -> {
-            fusionSlam.setTick(tickBroadcast.getTick());
+            if(MessageBusImpl.getInstance().getNumberofSensors()-2!=MessageBusImpl.getInstance().getNumberofTerminated())
+                fusionSlam.setTick(tickBroadcast.getTick());
+            else
+                sendBroadcast(new TerminatedBroadcast("FusionSlamService"));
         });
 
         // Handle TrackedObjectsEvent

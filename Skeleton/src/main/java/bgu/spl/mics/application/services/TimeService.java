@@ -63,26 +63,19 @@ public class TimeService extends MicroService {
 
         subscribeBroadcast(CrashedBroadcast.class, crash -> {
             System.out.println("Simulation stopping due to sensor failure: " + crash.getError());
-            generateErrorOutputFile(crash.getError(), crash.getFaultySensors());
+            scheduler.shutdown();
             terminate();
         });
 
         subscribeBroadcast(TerminatedBroadcast.class, terminated -> {
             System.out.println(getName() + " received TerminatedBroadcast. Terminating.");
+            scheduler.shutdown();
             terminate();
         });
     }
-
-    public  void generateErrorOutputFile(String error, List<String> faultySensors) {
-
-        ErrorDetails errorDetails = new ErrorDetails(error, faultySensors, Map.of(), List.of(), statisticalFolder);
-
-        SimulationOutput output = new SimulationOutput(statisticalFolder, null, errorDetails);
-
-        String outputPath = "example_input/output.json";
-        saveOutputFile(output, outputPath);
-    }
 }
+
+
 
 
 

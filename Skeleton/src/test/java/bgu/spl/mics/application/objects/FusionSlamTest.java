@@ -17,7 +17,7 @@ class FusionSlamTest {
 
     @BeforeEach
     void setUp() {
-        fusionSlam = new FusionSlam();
+        fusionSlam = FusionSlam.getInstance();
         statisticalFolder = StatisticalFolder.getInstance();
         pose = new Pose(1, 1, 90, 1);  // Sample pose (x, y, yaw, time)
         fusionSlam.addPose(pose);  // Set the pose for mapping

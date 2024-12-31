@@ -23,9 +23,14 @@ public class LiDarDataBase {
     }
 
     ConcurrentLinkedQueue<StampedCloudPoints> cloudPoints;
-
+    private int numberObjects;
     private LiDarDataBase(){
         cloudPoints = new ConcurrentLinkedQueue<>();
+        numberObjects=0;
+    }
+
+    public int sizeOfCloudPoints(){
+        return cloudPoints.size();
     }
 
     public static synchronized LiDarDataBase getInstance() {
@@ -40,7 +45,13 @@ public class LiDarDataBase {
         return null;
     }
 
+    public synchronized int getNumberObjects() {
+        return numberObjects;
+    }
 
+    public synchronized void DecreaseNumberObjects(){
+        numberObjects--;
+    }
 
     public void loadData(String path) {
         try (BufferedReader reader = new BufferedReader(new FileReader(path))) {
@@ -72,7 +83,7 @@ public class LiDarDataBase {
                     doubleList.add(y);
                     cloudPointslist.add(doubleList);
                 }
-
+                numberObjects++;
                 StampedCloudPoints temp = new StampedCloudPoints(id, time);
                 temp.AddCloudPoint(cloudPointslist);
                 cloudPoints.add(temp);

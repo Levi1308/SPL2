@@ -16,6 +16,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -30,6 +31,8 @@ import java.util.Map;
 public class CameraService extends MicroService {
     private final Camera camera;
     private int lastEventTick;
+    private Map<Integer,StampedDetectedObjects> detectedObjectsMap;
+    private int numberObjects;
 
     /**
      * Constructor for CameraService.
@@ -40,6 +43,8 @@ public class CameraService extends MicroService {
         super("CameraService_" + camera.getId());
         this.camera = camera;
         this.lastEventTick = 0;
+        this.detectedObjectsMap = new HashMap<Integer ,StampedDetectedObjects >();
+        numberObjects=0;
     }
 
     /**
@@ -51,13 +56,16 @@ public class CameraService extends MicroService {
     protected void initialize() {
         subscribeBroadcast(TickBroadcast.class, tickBroadcast -> {
             this.camera.setTick(tickBroadcast.getTick());
-            sendDetectObjectsEvents();
+            onTick( tickBroadcast.getTick());
 
             if (checkForSensorDisconnection()) {
-                List<String> faultySensors = List.of(getName());
-                System.err.println(getName() + " detected sensor disconnection. Broadcasting CrashedBroadcast.");
-                sendBroadcast(new CrashedBroadcast("Camera disconnected", faultySensors));
-                terminate();
+                ErrorDetails.getInstance().setError(
+                        "camera disconnected",
+                        "Camera"+camera.getId(),
+                        FusionSlam.getInstance().getPosesTill(tickBroadcast.getTick())
+                );
+                sendBroadcast(new CrashedBroadcast(tickBroadcast.getTick(),"camera disconnected","Camera"+camera.getId()));
+                LastFrame.getInstance().setDetectedObjects(getDetectedObjectstill(tickBroadcast.getTick()));
             }
         });
 
@@ -67,13 +75,28 @@ public class CameraService extends MicroService {
         });
 
         subscribeBroadcast(CrashedBroadcast.class, crash -> {
-            System.err.println(getName() + " received CrashedBroadcast: " + crash.getError());
+            System.out.println(getName() + " received crash broadcast. Shutting down.");
+
+            if(LastFrame.getInstance().getDetectedObjects().isEmpty())
+                LastFrame.getInstance().setDetectedObjects(getDetectedObjectstill(crash.getTime()));
             terminate();
+
         });
 
         System.out.println(getName() + " initialized and ready to process TickBroadcasts.");
     }
-
+    public void setDetectedObjectsMap(Map<Integer,StampedDetectedObjects> detectedObjectsMap,int numberObjects) {
+        this.detectedObjectsMap = detectedObjectsMap;
+        this.numberObjects=numberObjects;
+    }
+    public List<DetectedObject> getDetectedObjects(int tick) {
+        StampedDetectedObjects stampedObjects = detectedObjectsMap.get(tick);
+        if (stampedObjects == null) {
+            return new ArrayList<>();
+        }
+        numberObjects-=stampedObjects.getDetectedObjects().size();
+        return stampedObjects.getDetectedObjects();
+    }
 
     private boolean checkForSensorDisconnection() {
        return this.camera.getStatus() == STATUS.ERROR;
@@ -82,35 +105,35 @@ public class CameraService extends MicroService {
     /**
      * Sends DetectObjectsEvent if the current tick matches the camera's frequency.
      */
-    private void sendDetectObjectsEvents() {
-        int tickDifference = camera.getTick() - lastEventTick;
-        if (tickDifference >= camera.getFrequency()) {
-            List<DetectedObject> detectedObjects = camera.getDetectedObjects(camera.getTick());
-            DetectedObject error=AnErrorOccured(detectedObjects);
-            if(error==null)
-            {
-            if (!detectedObjects.isEmpty()) {
-                System.out.println("Camera " + camera.getId() + " detected " + detectedObjects.size() + " objects at tick " + camera.getTick());
-                sendEvent(new DetectObjectsEvent(detectedObjects, this.camera.getTick()));
-                lastEventTick = camera.getTick();
-                camera.addDetectedObjects(detectedObjects, camera.getTick());
+    private void onTick(int currentTick) {
+        if(numberObjects!=0) {
+            int tickDifference = camera.getTick() - lastEventTick;
+            if (tickDifference >= camera.getFrequency()) {
+                List<DetectedObject> detectedObjects = getDetectedObjects(camera.getTick());
+                camera.addDetectedObjects(detectedObjects);
+                DetectedObject error = AnErrorOccured(detectedObjects);
+                if (error == null) {
+                    if (!detectedObjects.isEmpty()) {
+                        System.out.println("Camera " + camera.getId() + " detected " + detectedObjects.size() + " objects at tick " + camera.getTick());
+                        camera.addDetectedObjects(detectedObjects);
+                        sendEvent(new DetectObjectsEvent(detectedObjects, this.camera.getTick()));
+                        lastEventTick = camera.getTick();
+                        System.out.println("DetectObjectsEvent sent by Camera " + camera.getId() + " at tick " + camera.getTick());
+                    } else {
+                        System.out.println("Camera " + camera.getId() + " detected no objects at tick " + camera.getTick());
+                    }
+                } else {
+                    sendBroadcast(new CrashedBroadcast(camera.getTick(), "camera disconnected", "Camera" + camera.getId()));
+                    terminate();
+                }
 
-                System.out.println("DetectObjectsEvent sent by Camera " + camera.getId() + " at tick " + camera.getTick());
             } else {
-                System.out.println("Camera " + camera.getId() + " detected no objects at tick " + camera.getTick());
+                System.out.println("Camera " + camera.getId() + " skipping DetectObjectsEvent. Tick difference: " + tickDifference);
             }
         }
-            else
-            {
-                List<String> faultySensors=new ArrayList<>();
-                faultySensors.add("Camera"+camera.getId());
-                sendBroadcast(new CrashedBroadcast(error.getDescription(),faultySensors));
-                terminate();
-                return;
-            }
-
-        } else {
-            System.out.println("Camera " + camera.getId() + " skipping DetectObjectsEvent. Tick difference: " + tickDifference);
+        else {
+            System.out.println("Camera Detected all Objects. Terminating at tick" +currentTick);
+            terminate();
         }
     }
     public DetectedObject AnErrorOccured(List<DetectedObject> objectList)
@@ -122,6 +145,21 @@ public class CameraService extends MicroService {
         }
         return null;
     }
+    public List<DetectedObject> getDetectedObjectstill(int tick) {
+        List<DetectedObject> output =new ArrayList<>();
+        for(StampedDetectedObjects stampedObjects : detectedObjectsMap.values()) {
+            if(stampedObjects.getTime()<=tick) {
+                output.addAll(stampedObjects.getDetectedObjects());
+            }
+        }
+        return output;
+    }
+    public Map<Integer,StampedDetectedObjects> getStampedDetectedObjectsMap() {
+        return detectedObjectsMap;
+    }
+
+
+
 
 
 

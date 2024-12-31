@@ -1,17 +1,30 @@
 package bgu.spl.mics.application.objects;
 
-
-import java.util.List;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import java.util.Map;
 
 public class SimulationOutput {
-    private StatisticalFolder statistics = StatisticalFolder.getInstance();;
-    private Map<String, LandMark> landmarks;
-    private ErrorDetails error;
+    private StatisticalFolder Statistics;
+    private Map<String, LandMark> landMarks;
 
-    public SimulationOutput(StatisticalFolder statistics, Map<String, LandMark> landmarks, ErrorDetails error) {
-        this.statistics = statistics;
-        this.landmarks = landmarks;
-        this.error = error;
+    public SimulationOutput( Map<String, LandMark> landmarks) {
+        this.Statistics = StatisticalFolder.getInstance();
+        this.landMarks = landmarks;
+    }
+
+    // Serialize SimulationOutput to JSON
+    public String toJson() {
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        return gson.toJson(this);
+    }
+
+    // Getters for landmarks and statistics
+    public Map<String, LandMark> getLandmarks() {
+        return landMarks;
+    }
+
+    public StatisticalFolder getStatistics() {
+        return Statistics;
     }
 }

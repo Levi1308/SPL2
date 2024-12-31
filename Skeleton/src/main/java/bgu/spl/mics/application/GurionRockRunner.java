@@ -167,8 +167,8 @@ public class GurionRockRunner {
                 }
             }
 
-
-            if (ErrorDetails.getInstance().getError() != null) {
+            String e=ErrorDetails.getInstance().getError();
+            if (e != null) {
                 // Write error to error_output.json
                 saveErrorFile(ErrorDetails.getInstance(), parentDir + File.separator +"error_output.json");
                 // Create empty output_file.json

@@ -69,6 +69,7 @@ public class LiDarService extends MicroService {
         if(!database.detectAll()) {
             List<TrackedObject> objectList = liDarTracker.onTick(currentTick);
             sendEvent(new TrackedObjectsEvent(objectList));
+            System.out.println("Lidar send new Tracked Objects");
         }
         else
         {

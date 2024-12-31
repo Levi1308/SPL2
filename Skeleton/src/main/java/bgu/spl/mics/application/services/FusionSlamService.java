@@ -58,7 +58,7 @@ public class FusionSlamService extends MicroService {
                 System.out.println("No tracked objects received at tick " + fusionSlam.getTick());
                 return;
             }
-
+            System.out.println("FusionSlam got event");
             int trackedTime = trackedObjects.get(0).getTime();
             int poseTime = fusionSlam.getCurrentPose().getTime();
 

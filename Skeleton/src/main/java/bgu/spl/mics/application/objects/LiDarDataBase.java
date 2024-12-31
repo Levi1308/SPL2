@@ -21,7 +21,6 @@ public class LiDarDataBase {
     private class LidarDataBaseHolder{
         private static LiDarDataBase instance = new LiDarDataBase();
     }
-
     ConcurrentLinkedQueue<StampedCloudPoints> cloudPoints;
     private int numberObjects;
     private LiDarDataBase(){
@@ -109,6 +108,8 @@ public class LiDarDataBase {
         builder.append("}");
         return builder.toString();
     }
-
+    public boolean detectAll(){
+        return numberObjects==0;
+    }
 }
 

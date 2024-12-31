@@ -94,7 +94,7 @@ public class GurionRockRunner {
                 String cameraKey = cameraConfig.get("camera_key").getAsString();
                 Camera c=new Camera(cameraId,cameraFrequency);
                 CameraService cameraService = new CameraService(c);
-                cameraService.setDetectedObjectsMap(readerCamera.getStampedDetectedObjects(cameraKey),readerCamera.getNumberObject(cameraKey));
+                c.setDetectedObjectsMap(readerCamera.getStampedDetectedObjects(cameraKey),readerCamera.getNumberObject(cameraKey));
                 Thread cameraThread = new Thread(cameraService);
                 threads.add(cameraThread);
                 cameraThread.start();

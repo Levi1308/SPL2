@@ -1,6 +1,10 @@
 package bgu.spl.mics.application.objects;
 
+import bgu.spl.mics.application.messages.CrashedBroadcast;
+import bgu.spl.mics.application.messages.TrackedObjectsEvent;
+
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -14,12 +18,16 @@ public class LiDarWorkerTracker {
     private STATUS status;
     private int frequency;
     List<TrackedObject> lastTrackedobjects;
+    StatisticalFolder statisticalFolder;
+    LiDarDataBase database;
 
     public LiDarWorkerTracker(int id, int frequency) {
         this.id = id;
-        this.lastTrackedobjects = new ArrayList<>();
+        this.lastTrackedobjects = Collections.synchronizedList(new ArrayList<>());
         this.frequency = frequency;
         status=STATUS.UP;
+        statisticalFolder=StatisticalFolder.getInstance();
+        database=LiDarDataBase.getInstance();
     }
 
     public int getId() {
@@ -60,9 +68,31 @@ public class LiDarWorkerTracker {
     private void processLiDARData(List<StampedCloudPoints> cloudPoints) {
 
     }
-
-
-    public List<CloudPoint> getCloudPointstill(int currentTick) {
+    public DetectedObject onDetectedObject(int currentTime, List<DetectedObject> detectedObjectList) {
+        if (detectedObjectList.isEmpty()) {
+            System.out.println("No objects detected at tick " + currentTime);
+            return null;
+        }
+        List<TrackedObject> trackedObjects = new ArrayList<>();
+        for (DetectedObject object : detectedObjectList) {
+            if (!object.getId().equals("ERROR")) {
+                List<List<Double>> doublePoints = database.RetriveCloudPoints(object, currentTime);
+                List<CloudPoint> cloudPoints = new ArrayList<>();
+                for (List<Double> list : doublePoints) {
+                    cloudPoints.add(new CloudPoint(list.get(0), list.get(1)));
+                }
+                TrackedObject trackedObject = new TrackedObject(object.getId(), currentTime, object.getDescription(), cloudPoints);
+                addTrackedObject(trackedObject);
+                database.DecreaseNumberObjects();
+                trackedObjects.add(trackedObject);
+                statisticalFolder.incrementTrackedObjects(1);//בעיה עם תרד
+            }
+            else
+                return object;
+            }
+        return null;
+    }
+        public List<CloudPoint> getCloudPointstill(int currentTick) {
         List<CloudPoint> cloudPoints=new ArrayList<>();
         for(TrackedObject obj:lastTrackedobjects){
             if(obj.getTime()<=currentTick){

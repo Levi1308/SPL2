@@ -21,8 +21,11 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.io.FileReader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 /**
  * PoseService is responsible for maintaining the robot's current pose (position and orientation)
@@ -33,14 +36,15 @@ public class PoseService extends MicroService {
  private List<Pose> poses;
  private int sizePoses;
 
+
     public PoseService(GPSIMU gpsimu) {
         super("PoseService");
         this.gpsimu=gpsimu;
-        poses=new ArrayList<>();
+        poses= Collections.synchronizedList(new ArrayList<>());
     }
 
     public void setPoses(List<Pose> poses) {
-        this.poses = poses;
+        this.poses.addAll(poses);
         sizePoses=poses.size();
     }
 

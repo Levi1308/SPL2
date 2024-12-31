@@ -167,8 +167,10 @@ public class GurionRockRunner {
                 }
             }
 
-            String e=ErrorDetails.getInstance().getError();
-            if (e != null) {
+
+            if (ErrorDetails.getInstance().getError() != null) {
+                SimulationOutput output = new SimulationOutput(FusionSlam.getInstance().getLandmarks());
+                ErrorDetails.getInstance().serSimulationOutput(output);
                 // Write error to error_output.json
                 saveErrorFile(ErrorDetails.getInstance(), parentDir + File.separator +"error_output.json");
                 // Create empty output_file.json

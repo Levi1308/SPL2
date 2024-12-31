@@ -21,6 +21,7 @@ public class Camera {
     private StatisticalFolder statisticalFolder = StatisticalFolder.getInstance();
     private int numberObjects;
 
+
     public Camera(int id, int frequency) {
         this.id = id;
         this.frequency = frequency;
@@ -34,23 +35,12 @@ public class Camera {
         return this.status;
     }
 
-    public void setTick(int tick) {
+    public synchronized void setTick(int tick) {
         this.tick = tick;
-        lock.lock();
-        try {
-            return;
-        } finally {
-            lock.unlock();
-        }
     }
 
-    public int getTick() {
-        lock.lock();
-        try {
-            return this.tick;
-        } finally {
-            lock.unlock();
-        }
+    public synchronized int getTick() {
+        return this.tick;
     }
 
 
@@ -62,52 +52,28 @@ public class Camera {
         return frequency;
     }
 
-    public void setDetectedObjectsMap(Map<Integer, StampedDetectedObjects> detectedObjectsMap,int numberObjects) {
-        lock.lock();
-        try {
-            this.detectedObjectsMap = new ConcurrentHashMap<>(detectedObjectsMap);
-            this.numberObjects=numberObjects;
-        } finally {
-            lock.unlock();
-        }
+    public synchronized void setDetectedObjectsMap(Map<Integer, StampedDetectedObjects> detectedObjectsMap,int numberObjects) {
+        this.detectedObjectsMap = new ConcurrentHashMap<>(detectedObjectsMap);
+        this.numberObjects=numberObjects;
+
     }
 
-    public Map<Integer, StampedDetectedObjects> getStampedDetectedObjectsMap() {
-        lock.lock();
-        try {
-            return new HashMap<>(detectedObjectsMap);  // Return a copy to avoid exposing internal state
-        } finally {
-            lock.unlock();
+
+
+    public synchronized List<DetectedObject> getDetectedObjects(int tick) {
+        StampedDetectedObjects stampedObjects = detectedObjectsMap.get(tick);
+        if (stampedObjects == null) {
+            return new ArrayList<>();
         }
+        return stampedObjects.getDetectedObjects();
+
     }
 
-    public List<DetectedObject> getDetectedObjects(int tick) {
-        lock.lock();
-        try {
-            StampedDetectedObjects stampedObjects = detectedObjectsMap.get(tick);
-            if (stampedObjects == null) {
-                return new ArrayList<>();
-            }
-            return stampedObjects.getDetectedObjects();
-        } finally {
-            lock.unlock();
-        }
+    public synchronized StampedDetectedObjects getStampedObjects(int tick) {
+        return detectedObjectsMap.get(tick);
     }
 
-    public List<DetectedObject> getDetectedObjectstill(int tick) {
-        lock.lock();
-        try {
-            List<DetectedObject> output = new ArrayList<>();
-            for (StampedDetectedObjects stampedObjects : detectedObjectsMap.values()) {
-                if (stampedObjects.getTime() <= tick) {
-                    output.addAll(stampedObjects.getDetectedObjects());
-                }
-            }
-            return output;
-        } finally {
-            lock.unlock();
-        }
-    }
+
 
 
     public List<DetectedObject> onTick() {

@@ -41,7 +41,7 @@ public class LiDarDataBase {
             if (s.getId().equals(object.getId()) && s.getTime()==currentTime)
                 return s.getCloudPoints();
         }
-        return null;
+        return new ArrayList<>();
     }
 
     public synchronized int getNumberObjects() {

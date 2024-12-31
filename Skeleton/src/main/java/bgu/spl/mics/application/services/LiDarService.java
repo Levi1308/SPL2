@@ -25,20 +25,24 @@ import java.util.concurrent.ConcurrentSkipListSet;
 public class LiDarService extends MicroService {
     private LiDarWorkerTracker liDarTracker;
     private LiDarDataBase database;
+    private ErrorDetails errorDetails;
 
     //LiDarWorkerTracker liDarWorkerTracker
     public LiDarService(LiDarWorkerTracker liDarTracker) {
         super("LidarWorkerService");
         this.liDarTracker = liDarTracker;
         database=LiDarDataBase.getInstance();
+        errorDetails = ErrorDetails.getInstance();
     }
     @Override
     protected void initialize() {
         subscribeBroadcast(TickBroadcast.class, (TickBroadcast broadcast) -> {
             int currentTick = broadcast.getTick();
             if (checkForSensorDisconnection()) {
+                errorDetails.setError("LiDar disconnected", "LiDar"+liDarTracker.getId(), FusionSlam.getInstance().getPosesTill(currentTick));
+                errorDetails.addLastLiDarFrame("LiDarWorkerTracker"+liDarTracker.getId(),liDarTracker.getTrackedObjects(currentTick));
                 sendBroadcast(new CrashedBroadcast(currentTick,"LiDar disconnected","LiDar"+liDarTracker.getId()));
-                LastFrame.getInstance().setLidarCloudPoints(liDarTracker.getCloudPointstill(currentTick));
+
                 terminate();
             }
             onTick(currentTick);
@@ -48,9 +52,8 @@ public class LiDarService extends MicroService {
         });
         subscribeBroadcast(CrashedBroadcast.class, crash -> {
             System.out.println(getName() + " terminating due to error: " + crash.getError());
-            if(LastFrame.getInstance().getLidarCloudPoints().isEmpty()){
-                LastFrame.getInstance().setLidarCloudPoints(liDarTracker.getCloudPointstill(crash.getTime()));
-            }
+            //errorDetails.setError(crash.getError(), crash.getFaultySensor(), FusionSlam.getInstance().getPosesTill(crash.getTime()));
+            errorDetails.addLastLiDarFrame("LiDarWorkerTracker"+liDarTracker.getId(),liDarTracker.getTrackedObjects(crash.getTime()));
             onTerminate();
         });
         subscribeEvent(DetectObjectsEvent.class, (DetectObjectsEvent event) -> {
@@ -85,11 +88,13 @@ public class LiDarService extends MicroService {
 
 
     public void onDetectedObject(int currentTime, List<DetectedObject> detectedObjectList){
-        DetectedObject error=liDarTracker.onDetectedObject(currentTime,detectedObjectList);
+        if(!detectedObjectList.isEmpty()) {
+            DetectedObject error=liDarTracker.onDetectedObject(currentTime,detectedObjectList);
         if(error!=null){
             String faultySensor = "LiDar Disconnected";
             sendBroadcast(new CrashedBroadcast(currentTime,error.getDescription(), faultySensor));
             terminate();
         }
+    }
     }
 }

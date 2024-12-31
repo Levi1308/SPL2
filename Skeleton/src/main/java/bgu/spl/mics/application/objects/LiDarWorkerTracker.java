@@ -21,6 +21,8 @@ public class LiDarWorkerTracker {
     StatisticalFolder statisticalFolder;
     LiDarDataBase database;
 
+
+
     public LiDarWorkerTracker(int id, int frequency) {
         this.id = id;
         this.lastTrackedobjects = Collections.synchronizedList(new ArrayList<>());
@@ -28,11 +30,13 @@ public class LiDarWorkerTracker {
         status=STATUS.UP;
         statisticalFolder=StatisticalFolder.getInstance();
         database=LiDarDataBase.getInstance();
+
     }
 
     public int getId() {
         return id;
     }
+
 
     public int getFrequency() {
         return frequency;
@@ -44,6 +48,12 @@ public class LiDarWorkerTracker {
 
     public List<TrackedObject> getLastTrackedobjects() {
         return lastTrackedobjects;
+    }
+
+    public List<TrackedObject> getTrackedObjects(int tick) {
+        List<TrackedObject> trackedObjects=new ArrayList<>();
+        trackedObjects.add(lastTrackedobjects.get(tick));
+        return trackedObjects;
     }
 
     public void setFrequency(int frequency) {
@@ -105,13 +115,5 @@ public class LiDarWorkerTracker {
         return null; // Return null if no errors were encountered
     }
 
-    public List<CloudPoint> getCloudPointstill(int currentTick) {
-        List<CloudPoint> cloudPoints=new ArrayList<>();
-        for(TrackedObject obj:lastTrackedobjects){
-            if(obj.getTime()<=currentTick){
-                cloudPoints.addAll(obj.getCoordinate());
-            }
-        }
-        return cloudPoints;
-    }
+
 }

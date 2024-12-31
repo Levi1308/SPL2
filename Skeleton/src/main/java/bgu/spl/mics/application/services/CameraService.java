@@ -20,6 +20,7 @@ import java.util.List;
 public class CameraService extends MicroService {
     private final Camera camera;
     private int lastEventTick;
+    private ErrorDetails errorDetails;
 
     /**
      * Constructor for CameraService.
@@ -30,6 +31,7 @@ public class CameraService extends MicroService {
         super("CameraService_" + camera.getId());
         this.camera = camera;
         this.lastEventTick = 0;
+        errorDetails = ErrorDetails.getInstance();
     }
 
     /**
@@ -43,14 +45,10 @@ public class CameraService extends MicroService {
             this.camera.setTick(tickBroadcast.getTick());
             onTick();
             if (checkForSensorDisconnection()) {
-                ErrorDetails.getInstance().setError(
-                        "camera disconnected",
-                        "Camera" + camera.getId(),
-                        FusionSlam.getInstance().getPosesTill(tickBroadcast.getTick())
-                );
+                errorDetails.setError("camera disconnected", "Camera" + camera.getId(), FusionSlam.getInstance().getPosesTill(tickBroadcast.getTick()));
+                errorDetails.addLastCameraFrame("Camera" + camera.getId(), camera.getStampedObjects(tickBroadcast.getTick()));
                 sendBroadcast(new CrashedBroadcast(tickBroadcast.getTick(), "camera disconnected", "Camera" + camera.getId()));
-
-                LastFrame.getInstance().setDetectedObjects(camera.getDetectedObjectstill(tickBroadcast.getTick()));
+                terminate();
             }
         });
 
@@ -61,11 +59,7 @@ public class CameraService extends MicroService {
 
         subscribeBroadcast(CrashedBroadcast.class, crash -> {
             System.out.println(getName() + " received crash broadcast. Shutting down.");
-            if (LastFrame.getInstance().getDetectedObjects().isEmpty())
-                LastFrame.getInstance().setDetectedObjects(camera.getDetectedObjectstill(crash.getTime()));
-            if (ErrorDetails.getInstance().getError()==null){
-                ErrorDetails.getInstance().setError(crash.getError(), crash.getFaultySensor(), FusionSlam.getInstance().getPosesTill(crash.getTime()));
-            }
+            //errorDetails.addLastCameraFrame("Camera"+camera.getId(),camera.getDetectedObjects(crash.getTime()));
             terminate();
 
         });
@@ -91,7 +85,10 @@ public class CameraService extends MicroService {
                     lastEventTick = camera.getTick();
                     System.out.println("Camera sent DetectObjectsEvent" + camera.getId() + " at tick " + camera.getTick());
                 } else {
-                    sendBroadcast(new CrashedBroadcast(camera.getTick(), detectedObjects.get(0).getDescription(), "Camera" + camera.getId()));
+                    errorDetails.setError("camera disconnected", "Camera" + camera.getId(), FusionSlam.getInstance().getPosesTill(camera.getTick()));
+                    errorDetails.addLastCameraFrame("Camera" + camera.getId(), camera.getStampedObjects(camera.getTick()));
+                    sendBroadcast(new CrashedBroadcast(camera.getTick(), "Camera disconnected", "Camera" + camera.getId()));
+
                     terminate();
                 }
             } else {

@@ -1,6 +1,6 @@
 {
   "Statistics": {
-    "systemRuntime": 21,
+    "systemRuntime": 15,
     "numTrackedObjects": 9,
     "numDetectedObjects": 9,
     "numLandmarks": 7
@@ -25,12 +25,12 @@
       "description": "Wall",
       "coordinates": [
         {
-          "x": -7.194370619148762,
-          "y": 3.4069288785523133
+          "x": -2.6882128166564954,
+          "y": 5.78546831239456
         },
         {
-          "x": -7.331389573323565,
-          "y": 3.2496124766838395
+          "x": -2.852941221056273,
+          "y": 5.763747954999182
         }
       ]
     },

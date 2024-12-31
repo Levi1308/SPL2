@@ -21,21 +21,21 @@ public class LastFrame {
         return LastFrameHolder.instance;
     }
 
-    public List<DetectedObject> getDetectedObjects() {
+    public synchronized List<DetectedObject> getDetectedObjects() {
         return detectedObjects;
     }
 
-    public List<CloudPoint> getLidarCloudPoints() {
+    public synchronized List<CloudPoint> getLidarCloudPoints() {
         return lidarCloudPoints;
     }
 
 
 
-    public void setDetectedObjects(List<DetectedObject> detectedObjects) {
+    public synchronized void setDetectedObjects(List<DetectedObject> detectedObjects) {
         this.detectedObjects = detectedObjects;
     }
 
-    public void setLidarCloudPoints(List<CloudPoint> lidarCloudPoints) {
+    public synchronized void setLidarCloudPoints(List<CloudPoint> lidarCloudPoints) {
         this.lidarCloudPoints = lidarCloudPoints;
     }
 

@@ -63,6 +63,9 @@ public class CameraService extends MicroService {
             System.out.println(getName() + " received crash broadcast. Shutting down.");
             if (LastFrame.getInstance().getDetectedObjects().isEmpty())
                 LastFrame.getInstance().setDetectedObjects(camera.getDetectedObjectstill(crash.getTime()));
+            if (ErrorDetails.getInstance().getError()==null){
+                ErrorDetails.getInstance().setError(crash.getError(), crash.getFaultySensor(), FusionSlam.getInstance().getPosesTill(crash.getTime()));
+            }
             terminate();
 
         });
@@ -78,6 +81,7 @@ public class CameraService extends MicroService {
     /**
      * Sends DetectObjectsEvent if the current tick matches the camera's frequency.
      */
+
     private void onTick() {
         if (!camera.detectAll()) {
             List<DetectedObject> detectedObjects = camera.onTick();

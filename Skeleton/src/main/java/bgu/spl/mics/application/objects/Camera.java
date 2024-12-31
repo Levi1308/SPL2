@@ -1,14 +1,10 @@
 package bgu.spl.mics.application.objects;
-
-import bgu.spl.mics.Future;
-import bgu.spl.mics.application.messages.CrashedBroadcast;
-import bgu.spl.mics.application.messages.DetectObjectsEvent;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Represents a camera sensor on the robot.
@@ -21,6 +17,7 @@ public class Camera {
     private ConcurrentHashMap<Integer, StampedDetectedObjects> detectedObjectsMap;
     private STATUS status;
     private int tick;
+    private final ReentrantLock lock = new ReentrantLock();
     private StatisticalFolder statisticalFolder = StatisticalFolder.getInstance();
     private int numberObjects;
 
@@ -33,32 +30,29 @@ public class Camera {
         numberObjects = 0;
     }
 
-    /**
-     * Adds detected objects to the camera's internal list.
-     *
-     * @param detectedObjects The list of detected objects to add.
-     * @param tick            The tick at which the objects were detected.
-     */
-    public void addDetectedObjects(List<DetectedObject> detectedObjects, int tick) {
-        if (!detectedObjects.isEmpty()) {
-            StampedDetectedObjects stamped = new StampedDetectedObjects(tick, detectedObjects);
-            detectedObjectsMap.put(tick, stamped);
-            statisticalFolder.incrementDetectedObjects(stamped.getDetectedObjects().size());
-
-        }
-    }
-
     public STATUS getStatus() {
         return this.status;
     }
 
-    public int getTick() {
-        return this.tick;
-    }
-
     public void setTick(int tick) {
         this.tick = tick;
+        lock.lock();
+        try {
+            return;
+        } finally {
+            lock.unlock();
+        }
     }
+
+    public int getTick() {
+        lock.lock();
+        try {
+            return this.tick;
+        } finally {
+            lock.unlock();
+        }
+    }
+
 
     public int getId() {
         return id;
@@ -68,33 +62,53 @@ public class Camera {
         return frequency;
     }
 
-    public void setDetectedObjectsMap(Map<Integer, StampedDetectedObjects> detectedObjectsMap, int numberObjects) {
-        this.detectedObjectsMap = new ConcurrentHashMap<>(detectedObjectsMap); // Convert to ConcurrentHashMap
-        this.numberObjects = numberObjects;
+    public void setDetectedObjectsMap(Map<Integer, StampedDetectedObjects> detectedObjectsMap) {
+        lock.lock();
+        try {
+            this.detectedObjectsMap = new ConcurrentHashMap<>(detectedObjectsMap);
+        } finally {
+            lock.unlock();
+        }
     }
 
     public Map<Integer, StampedDetectedObjects> getStampedDetectedObjectsMap() {
-        return detectedObjectsMap;
+        lock.lock();
+        try {
+            return new HashMap<>(detectedObjectsMap);  // Return a copy to avoid exposing internal state
+        } finally {
+            lock.unlock();
+        }
     }
 
     public List<DetectedObject> getDetectedObjects(int tick) {
-        StampedDetectedObjects stampedObjects = detectedObjectsMap.getOrDefault(tick, null);
-        if (stampedObjects == null) {
-            return new ArrayList<>();
+        lock.lock();
+        try {
+            StampedDetectedObjects stampedObjects = detectedObjectsMap.get(tick);
+            if (stampedObjects == null) {
+                return new ArrayList<>();
+            }
+            statisticalFolder.incrementDetectedObjects(stampedObjects.getDetectedObjects().size());
+            return stampedObjects.getDetectedObjects();
+        } finally {
+            lock.unlock();
         }
-        numberObjects-=stampedObjects.getDetectedObjects().size();
-        return stampedObjects.getDetectedObjects();
     }
 
     public List<DetectedObject> getDetectedObjectstill(int tick) {
-        List<DetectedObject> output = new ArrayList<>();
-        for (StampedDetectedObjects stampedObjects : detectedObjectsMap.values()) {
-            if (stampedObjects.getTime() <= tick) {
-                output.addAll(stampedObjects.getDetectedObjects());
+        lock.lock();
+        try {
+            List<DetectedObject> output = new ArrayList<>();
+            for (StampedDetectedObjects stampedObjects : detectedObjectsMap.values()) {
+                if (stampedObjects.getTime() <= tick) {
+                    output.addAll(stampedObjects.getDetectedObjects());
+                }
             }
+            return output;
+        } finally {
+            lock.unlock();
         }
-        return output;
     }
+
 
     public List<DetectedObject> onTick() {
         List<DetectedObject> detectedObjects = getDetectedObjects(getTick() - getFrequency());
@@ -121,3 +135,5 @@ public class Camera {
         return numberObjects==0;
     }
 }
+
+

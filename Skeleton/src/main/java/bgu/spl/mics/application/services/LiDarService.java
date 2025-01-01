@@ -18,6 +18,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 
@@ -57,7 +58,7 @@ public class LiDarService extends MicroService {
             onTerminate();
         });
         subscribeEvent(DetectObjectsEvent.class, (DetectObjectsEvent event) -> {
-            onDetectedObject(event.getTime(),event.getDetectedObjects());
+            onDetectedObject2(event.getTime(),event.getDetectedObjects());
         });
     }
 
@@ -97,5 +98,11 @@ public class LiDarService extends MicroService {
             terminate();
         }
     }
+    }
+    public void onDetectedObject2(int currentTime, List<DetectedObject> detectedObjectList) {
+        if(!liDarTracker.onDetectedObject2(currentTime,detectedObjectList))
+        {
+            sendBroadcast(new CrashedBroadcast(currentTime, "Lidar" + liDarTracker.getId(), errorDetails.getError()));
+        }
     }
 }

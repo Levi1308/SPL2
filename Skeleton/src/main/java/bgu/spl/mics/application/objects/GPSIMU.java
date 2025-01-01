@@ -42,6 +42,7 @@ public class GPSIMU {
         poses.add(pose);
     }
 
-
-
+    public void setPoses(List<Pose> poses) {
+        this.poses = poses;
+    }
 }

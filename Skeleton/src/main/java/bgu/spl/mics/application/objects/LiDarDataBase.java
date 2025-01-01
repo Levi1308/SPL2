@@ -36,7 +36,7 @@ public class LiDarDataBase {
         return LidarDataBaseHolder.instance;
     }
 
-    public List<List<Double>> RetriveCloudPoints(DetectedObject object,int currentTime){
+    public synchronized List<List<Double>> RetriveCloudPoints(DetectedObject object,int currentTime){
         for(StampedCloudPoints s:cloudPoints) {
             if (s.getId().equals(object.getId()) && s.getTime()==currentTime)
                 return s.getCloudPoints();

@@ -28,7 +28,6 @@ class FusionSlamTest {
         statisticalFolder.reset();  // Reset statistics after each test
         fusionSlam = null;  // Clear the FusionSlam instance
         pose=null;
-        statisticalFolder=null;
     }
 
     @Test

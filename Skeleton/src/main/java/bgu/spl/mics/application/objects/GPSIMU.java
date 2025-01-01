@@ -4,9 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import bgu.spl.mics.application.messages.PoseEvent;
-import bgu.spl.mics.application.objects.Camera.*;
-
 /**
  * Represents the robot's GPS and IMU system.
  * Provides information about the robot's position and movement.

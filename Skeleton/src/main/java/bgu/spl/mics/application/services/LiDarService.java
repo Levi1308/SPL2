@@ -38,7 +38,7 @@ public class LiDarService extends MicroService {
         subscribeBroadcast(CrashedBroadcast.class, crash -> {
             System.out.println(getName() + " terminating due to error: " + crash.getError());
             //errorDetails.setError(crash.getError(), crash.getFaultySensor(), FusionSlam.getInstance().getPosesTill(crash.getTime()));
-            errorDetails.addLastLiDarFrame("LiDarWorkerTracker"+liDarTracker.getId(),liDarTracker.getTrackedObjects(crash.getTime()));
+            //errorDetails.addLastLiDarFrame("LiDarWorkerTracker"+liDarTracker.getId(),liDarTracker.getTrackedObjects(crash.getTime()));
             onTerminate();
         });
         subscribeEvent(DetectObjectsEvent.class, (DetectObjectsEvent event) -> {

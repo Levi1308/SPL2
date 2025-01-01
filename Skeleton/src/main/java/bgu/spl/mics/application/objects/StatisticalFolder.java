@@ -41,7 +41,7 @@ public class StatisticalFolder {
     /**
      * Increments the system runtime by one tick.
      */
-    public void incrementRuntime() {
+    public synchronized void incrementRuntime() {
         systemRuntime.incrementAndGet();
     }
 
@@ -50,7 +50,7 @@ public class StatisticalFolder {
      *
      * @param count Number of detected objects to add.
      */
-    public void incrementDetectedObjects(int count) {
+    public synchronized void incrementDetectedObjects(int count) {
         numDetectedObjects.addAndGet(count);
     }
 
@@ -59,7 +59,7 @@ public class StatisticalFolder {
      *
      * @param count Number of tracked objects to add.
      */
-    public void incrementTrackedObjects(int count) {
+    public synchronized void incrementTrackedObjects(int count) {
         numTrackedObjects.addAndGet(count);
     }
 
@@ -68,7 +68,7 @@ public class StatisticalFolder {
      *
      * @param count Number of landmarks to add.
      */
-    public void incrementLandmarks(int count) {
+    public synchronized void incrementLandmarks(int count) {
         numLandmarks.addAndGet(count);
     }
 

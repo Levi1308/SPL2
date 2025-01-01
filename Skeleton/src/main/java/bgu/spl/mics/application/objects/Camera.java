@@ -1,8 +1,10 @@
 package bgu.spl.mics.application.objects;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Represents a camera sensor on the robot.
@@ -17,6 +19,10 @@ public class Camera {
     private int tick;
     private StatisticalFolder statisticalFolder = StatisticalFolder.getInstance();
     private int numberObjects;
+    private final ConcurrentHashMap<String, Boolean> processedObjects = new ConcurrentHashMap<>();
+    private StampedDetectedObjects lastFrame;
+
+
 
 
     public Camera(int id, int frequency) {
@@ -75,6 +81,9 @@ public class Camera {
 
     public List<DetectedObject> onTick() {
         List<DetectedObject> detectedObjects = getDetectedObjects(getTick() - getFrequency());
+        if (!detectedObjects.isEmpty() && !detectedObjects.get(0).getId().equals("ERROR")) {
+            lastFrame = new StampedDetectedObjects(getTick(), detectedObjects);
+        }
         statisticalFolder.incrementDetectedObjects(detectedObjects.size());
         numberObjects-=detectedObjects.size();
         DetectedObject error = AnErrorOccured(detectedObjects);
@@ -99,6 +108,10 @@ public class Camera {
     public boolean detectAll(){
         return numberObjects==0;
     }
+    public StampedDetectedObjects getLastFrame() {
+        return lastFrame;
+    }
+
 }
 
 

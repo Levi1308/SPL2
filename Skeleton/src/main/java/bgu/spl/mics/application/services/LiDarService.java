@@ -25,7 +25,8 @@ public class LiDarService extends MicroService {
             int currentTick = broadcast.getTick();
             if (checkForSensorDisconnection()) {
                 errorDetails.setError("LiDar disconnected", "LiDar"+liDarTracker.getId(), FusionSlam.getInstance().getPosesTill(currentTick));
-                errorDetails.addLastLiDarFrame("LiDarWorkerTracker"+liDarTracker.getId(),liDarTracker.getTrackedObjects(currentTick));
+
+
                 sendBroadcast(new CrashedBroadcast(currentTick,"LiDar disconnected","LiDar"+liDarTracker.getId()));
 
                 terminate();

@@ -79,28 +79,41 @@ public class LiDarWorkerTracker {
 
     }
     public DetectedObject onDetectedObject(int currentTime, List<DetectedObject> detectedObjectList) {
-        if (detectedObjectList.isEmpty()) {
+        if (detectedObjectList == null || detectedObjectList.isEmpty()) {
             System.out.println("No objects detected at tick " + currentTime);
             return null;
         }
-        List<TrackedObject> trackedObjects = new ArrayList<>();
+
         for (DetectedObject object : detectedObjectList) {
-            if (!object.getId().equals("ERROR")) {
-                List<List<Double>> doublePoints = database.RetriveCloudPoints(object, currentTime);
-                List<CloudPoint> cloudPoints = new ArrayList<>();
-                for (List<Double> list : doublePoints) {
-                    cloudPoints.add(new CloudPoint(list.get(0), list.get(1)));
+            if (object.getId().equals("ERROR")) {
+                System.out.println("Error detected in object at tick " + currentTime + ": " + object.getDescription());
+                return object; // Return immediately if an error object is detected
+            }
+
+            // Process non-error objects
+            List<List<Double>> doublePoints = database.RetriveCloudPoints(object, currentTime);
+            if (doublePoints == null || doublePoints.isEmpty()) {
+                System.out.println("No cloud points retrieved for object " + object.getId() + " at tick " + currentTime);
+                continue; // Skip this object if no cloud points are available
+            }
+
+            List<CloudPoint> cloudPoints = new ArrayList<>();
+            for (List<Double> list : doublePoints) {
+                if (list.size() < 2) {
+                    System.out.println("Invalid cloud point data for object " + object.getId());
+                    continue; // Skip invalid data
                 }
-                TrackedObject trackedObject = new TrackedObject(object.getId(), currentTime, object.getDescription(), cloudPoints);
-                addTrackedObject(trackedObject);
-                database.DecreaseNumberObjects();
-                trackedObjects.add(trackedObject);
-                statisticalFolder.incrementTrackedObjects(1);
+                cloudPoints.add(new CloudPoint(list.get(0), list.get(1)));
             }
-            else
-                return object;
-            }
-        return null;
+
+            TrackedObject trackedObject = new TrackedObject(object.getId(), currentTime, object.getDescription(), cloudPoints);
+            lastTrackedobjects.add(trackedObject); // Add to tracked objects
+            database.DecreaseNumberObjects(); // Update database count
+            statisticalFolder.incrementTrackedObjects(1); // Increment tracked object count
+            System.out.println("Tracked object added: " + trackedObject);
+        }
+        return null; // Return null if no errors were encountered
     }
+
 
 }

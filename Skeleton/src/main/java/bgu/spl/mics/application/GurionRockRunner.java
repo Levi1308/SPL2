@@ -104,7 +104,7 @@ public class GurionRockRunner {
 
 
             // Extracting data from the "LidarWorkers" section
-            JsonObject lidarWorkers = configObject.getAsJsonObject("Lidarts");
+            JsonObject lidarWorkers = configObject.getAsJsonObject("LidarWorkers");
             JsonArray lidarConfigurations = lidarWorkers.getAsJsonArray("LidarConfigurations");
             String lidarDataPath = lidarWorkers.get("lidars_data_path").getAsString();
             path=parentDir.concat(lidarDataPath);

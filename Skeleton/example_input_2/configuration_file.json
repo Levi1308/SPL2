@@ -13,7 +13,7 @@
     ],
     "camera_datas_path": "./camera_data.json"
   },
-  "Lidars": {
+  "LidarWorkers": {
     "LidarConfigurations":[{
       "id": 1,
       "frequency": 4

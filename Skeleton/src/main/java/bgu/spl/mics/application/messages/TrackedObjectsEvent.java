@@ -19,5 +19,10 @@ public class TrackedObjectsEvent implements Event<List<TrackedObject>> {
     public List<TrackedObject> getTrackedObjects() {
         return trackedObjects;
     }
+
+    @Override
+    public String toString() {
+        return "TrackedObjectsEvent{}";
+    }
 }
 

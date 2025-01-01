@@ -61,7 +61,6 @@ public class FusionSlamService extends MicroService {
             System.out.println("FusionSlam got event");
             int trackedTime = trackedObjects.get(0).getTime();
             int poseTime = fusionSlam.getCurrentPose().getTime();
-
             if (poseTime >= trackedTime) {
                 System.out.println("FusionSlamService processing tracked objects at tick " + fusionSlam.getTick());
                 fusionSlam.doMapping(trackedObjects);

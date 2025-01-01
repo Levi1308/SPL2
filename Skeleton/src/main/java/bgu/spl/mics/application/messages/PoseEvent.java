@@ -18,5 +18,10 @@ public class PoseEvent implements Event<Pose> {
     public Pose getPose() {
         return pose;
     }
+
+    @Override
+    public String toString() {
+        return "PoseEvent";
+    }
 }
 

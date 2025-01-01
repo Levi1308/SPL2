@@ -92,6 +92,7 @@ public class MessageBusImpl implements MessageBus {
 			if (!subscribers.isEmpty()) {
 				MicroService m = subscribers.remove(0);
 				subscribers.add(m);
+                System.out.println(e.toString());
 				Queue<Message> queue = queues.get(m);
 				if (queue != null) {
 					queue.add(e);

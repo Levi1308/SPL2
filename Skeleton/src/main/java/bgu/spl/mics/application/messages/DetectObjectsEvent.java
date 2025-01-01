@@ -26,5 +26,8 @@ public class DetectObjectsEvent implements Event<List<DetectedObject>> {
 
         return detectedObjects;
     }
-
+    @Override
+    public String toString() {
+        return "DetectedObjectEvent";
+    }
 }

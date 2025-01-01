@@ -52,7 +52,7 @@ public class TimeService extends MicroService {
                 System.out.println("Simulation ended at tick " + ticks.get());
                 scheduler.shutdown();
             }
-        }, 0, TickTime, TimeUnit.SECONDS);
+            }, 0, TickTime, TimeUnit.SECONDS);
 
 
         subscribeBroadcast(CrashedBroadcast.class, crash -> {

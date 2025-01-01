@@ -26,6 +26,7 @@ public class LiDarDataBase {
         numberObjects=0;
     }
 
+
     public int sizeOfCloudPoints(){
         return cloudPoints.size();
     }

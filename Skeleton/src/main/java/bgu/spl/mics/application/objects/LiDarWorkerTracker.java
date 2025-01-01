@@ -4,6 +4,7 @@ package bgu.spl.mics.application.objects;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * LiDarWorkerTracker is responsible for managing a LiDAR worker.
@@ -18,6 +19,9 @@ public class LiDarWorkerTracker {
     List<TrackedObject> lastTrackedobjects;
     StatisticalFolder statisticalFolder;
     LiDarDataBase database;
+    private ErrorDetails errorDetails = ErrorDetails.getInstance();
+    private ConcurrentHashMap<Integer, TrackedObject> lastFrameMap = new ConcurrentHashMap<>();
+
 
 
 
@@ -60,6 +64,11 @@ public class LiDarWorkerTracker {
 
     public List<TrackedObject> onTick(int currentTick) {
         List<TrackedObject> lidarlist=getLastTrackedobjects();
+        if (!lidarlist.isEmpty()) {
+            TrackedObject lastTracked = lidarlist.get(lidarlist.size() - 1);
+            lastFrameMap.put(this.getId(), lastTracked);
+            errorDetails.addLastLiDarFrame("LiDarWorkerTracker" + this.getId(), new ArrayList<>(lastFrameMap.values()));
+        }
         List<TrackedObject> allTrackedObj=new ArrayList<>();
         int frequency= getFrequency();
         for(TrackedObject obj:lidarlist){
@@ -67,6 +76,7 @@ public class LiDarWorkerTracker {
                 allTrackedObj.add(obj);
             }
         }
+
         for(TrackedObject t:allTrackedObj)
         {
             lastTrackedobjects.remove(t);
@@ -75,6 +85,7 @@ public class LiDarWorkerTracker {
     }
     public void addTrackedObject(TrackedObject obj){
         lastTrackedobjects.add(obj);
+        lastFrameMap.put(obj.getTime(), obj);
 
     }
 

@@ -53,6 +53,8 @@ public class ErrorDetails {
         }
     }
 
+
+
     public synchronized void reset() {
         this.error = null;
         this.faultySensor = null;
@@ -80,4 +82,18 @@ public class ErrorDetails {
     public void serSimulationOutput(SimulationOutput simulationOutput) {
         this.simulationOutput = simulationOutput;
     }
+
+    public void resteLastCamera() {
+        this.lastCamerasFrame.clear();
+    }
+
+    public void resteLastLiDar() {
+        this.lastLiDarWorkerTrackersFrame.clear();
+    }
+
+    public List<TrackedObject> getLastLiDarWorkerTrackersFrame(String lidarId) {
+        return lastLiDarWorkerTrackersFrame.get(lidarId);
+    }
+
+
 }

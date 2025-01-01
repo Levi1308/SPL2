@@ -7,7 +7,6 @@ import com.google.gson.*;
 
 import java.io.*;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 
@@ -57,7 +56,6 @@ public class GurionRockRunner {
             return;
         }
         List<Thread> threads = new ArrayList<>();
-        List<Camera> cameraList=new ArrayList<>();
         List<LiDarWorkerTracker> liDarWorkerTrackerList=new ArrayList<>();
 
         String configFile = args[0];

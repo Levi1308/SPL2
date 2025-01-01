@@ -1,10 +1,8 @@
 package bgu.spl.mics.application.objects;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Represents a camera sensor on the robot.
@@ -17,7 +15,6 @@ public class Camera {
     private ConcurrentHashMap<Integer, StampedDetectedObjects> detectedObjectsMap;
     private STATUS status;
     private int tick;
-    private final ReentrantLock lock = new ReentrantLock();
     private StatisticalFolder statisticalFolder = StatisticalFolder.getInstance();
     private int numberObjects;
 

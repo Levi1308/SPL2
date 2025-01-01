@@ -1,6 +1,4 @@
 package bgu.spl.mics.application.objects;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Holds statistical information about the system's operation.

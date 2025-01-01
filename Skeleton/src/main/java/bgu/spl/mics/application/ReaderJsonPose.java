@@ -1,6 +1,5 @@
 package bgu.spl.mics.application;
 
-import bgu.spl.mics.application.objects.CloudPoint;
 import bgu.spl.mics.application.objects.Pose;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -34,7 +33,6 @@ public class ReaderJsonPose {
 
             // Parse the full JSON string into a JsonArray
             JsonArray jsonArray = gson.fromJson(jsonBuilder.toString(), JsonArray.class);
-            List<CloudPoint> cloudPointslist = new ArrayList<>();
             // Process each JSON object in the array
             for (JsonElement element : jsonArray) {
                 JsonObject jsonObject = element.getAsJsonObject();

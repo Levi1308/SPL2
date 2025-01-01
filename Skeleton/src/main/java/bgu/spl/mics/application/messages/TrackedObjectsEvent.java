@@ -11,7 +11,6 @@ import java.util.List;
  */
 public class TrackedObjectsEvent implements Event<List<TrackedObject>> {
     private final List<TrackedObject> trackedObjects;
-    private int currentTick;
     public TrackedObjectsEvent(List<TrackedObject> trackedObjects) {
         this.trackedObjects = trackedObjects;
     }

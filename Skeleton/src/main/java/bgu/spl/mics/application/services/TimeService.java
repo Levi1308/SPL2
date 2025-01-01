@@ -1,22 +1,16 @@
 package bgu.spl.mics.application.services;
 
 import bgu.spl.mics.MicroService;
-import bgu.spl.mics.application.GurionRockRunner;
 import bgu.spl.mics.application.messages.CrashedBroadcast;
 import bgu.spl.mics.application.messages.TerminatedBroadcast;
 import bgu.spl.mics.application.messages.TickBroadcast;
-import bgu.spl.mics.application.objects.ErrorDetails;
-import bgu.spl.mics.application.objects.SimulationOutput;
 import bgu.spl.mics.application.objects.StatisticalFolder;
 
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static bgu.spl.mics.application.GurionRockRunner.saveOutputFile;
 
 /**
  * TimeService acts as the global timer for the system, broadcasting TickBroadcast messages

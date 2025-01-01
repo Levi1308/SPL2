@@ -1,7 +1,5 @@
 package bgu.spl.mics.application.objects;
 
-import bgu.spl.mics.application.messages.CrashedBroadcast;
-import bgu.spl.mics.application.messages.TrackedObjectsEvent;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -79,9 +77,7 @@ public class LiDarWorkerTracker {
         lastTrackedobjects.add(obj);
 
     }
-    private void processLiDARData(List<StampedCloudPoints> cloudPoints) {
 
-    }
     public DetectedObject onDetectedObject(int currentTime, List<DetectedObject> detectedObjectList) {
         if (detectedObjectList == null || detectedObjectList.isEmpty()) {
             System.out.println("No objects detected at tick " + currentTime);

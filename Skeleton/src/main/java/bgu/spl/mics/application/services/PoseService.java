@@ -32,20 +32,17 @@ import java.util.concurrent.ConcurrentSkipListSet;
  * and broadcasting PoseEvents at every tick.
  */
 public class PoseService extends MicroService {
- private GPSIMU gpsimu;
- private List<Pose> poses;
- private int sizePoses;
+    private GPSIMU gpsimu;
 
 
     public PoseService(GPSIMU gpsimu) {
         super("PoseService");
-        this.gpsimu=gpsimu;
-        poses= Collections.synchronizedList(new ArrayList<>());
+        this.gpsimu = gpsimu;
+
     }
 
     public void setPoses(List<Pose> poses) {
-        this.poses.addAll(poses);
-        sizePoses=poses.size();
+        this.gpsimu.setPoses(poses);
     }
 
     @Override
@@ -71,31 +68,17 @@ public class PoseService extends MicroService {
     }
 
 
-
     public void onTick(int currentTick) {
-        if (sizePoses != 0) {
-            gpsimu.setCurrentTick(currentTick);
-            Pose temp;
-            if (currentTick < poses.size()) {
-                temp = poses.get(currentTick);
-                sizePoses--;
-            } else {
-                // Use the last pose repeatedly
-                temp = poses.get(poses.size() - 1);
-                System.out.println("Repeating last pose at tick " + currentTick);
-            }
-
-            gpsimu.addPose(temp);
-            PoseEvent poseEvent = new PoseEvent(temp);
+        if (!gpsimu.detectAll()) {
+            Pose pose = gpsimu.onTick(currentTick);
+            PoseEvent poseEvent = new PoseEvent(pose);
             sendEvent(poseEvent);
             System.out.println("Pose sent at tick " + currentTick);
-        }
-        else {
+        } else {
             System.out.println("All Pose detected. terminating at tick" + currentTick);
             terminate();
         }
     }
-
 
 
 }

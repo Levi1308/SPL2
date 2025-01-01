@@ -132,5 +132,12 @@ public class FusionSlam {
         }
         return globalPoints;
     }
-
+    public void reset(){
+        instance=null;
+        currentPose=null;
+        landmarks=null;
+        Poses=null;
+        Tick=0;
+        statisticalFolder = null;
+    }
 }

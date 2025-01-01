@@ -1,5 +1,4 @@
 package bgu.spl.mics.application.objects;
-import java.util.ArrayList;
 import java.util.List;
 /**
  * Represents objects detected by the camera at a specific timestamp.

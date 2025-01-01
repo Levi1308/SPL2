@@ -11,9 +11,10 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 class FusionSlamTest {
+
     private FusionSlam fusionSlam;
-    private StatisticalFolder statisticalFolder;
     private Pose pose;
+    private StatisticalFolder statisticalFolder;
 
     @BeforeEach
     void setUp() {
@@ -26,10 +27,36 @@ class FusionSlamTest {
     @AfterEach
     void tearDown() {
         statisticalFolder.reset();  // Reset statistics after each test
-        fusionSlam = null;  // Clear the FusionSlam instance
-        pose=null;
+        fusionSlam.reset();  // Clear the FusionSlam instance
+        pose = null;
+        statisticalFolder.reset();
     }
+    @Test
+    void doMapping_EmptyCoordinates() {
+        // Prepare tracked objects with no coordinates
+        List<TrackedObject> trackedObjects = new ArrayList<>();
+        trackedObjects.add(new TrackedObject("Wall_1", 1, "East wall section", new ArrayList<>()));
 
+        // Perform mapping
+        fusionSlam.doMapping(trackedObjects);
+
+        // Verify that no landmark was added
+        assertFalse(fusionSlam.getLandmarks().containsKey("Wall_1"));
+        assertEquals(0, statisticalFolder.getNumLandmarks());  // Ensure the count is still 0
+    }
+    @Test
+    void doMapping_NoPoseForTrackedObject() {
+        // Prepare tracked objects with a time that doesn't match the current pose
+        List<TrackedObject> trackedObjects = new ArrayList<>();
+        trackedObjects.add(new TrackedObject("Wall_1", 2, "East wall section",
+                Arrays.asList(new CloudPoint(0.1, 3.7), new CloudPoint(0.2, 3.8))));
+
+        // Perform mapping with no matching pose
+        fusionSlam.doMapping(trackedObjects);
+
+        // Verify that no landmark was added due to missing pose
+        assertFalse(fusionSlam.getLandmarks().containsKey("Wall_1"));
+    }
     @Test
     void doMapping_NewLandmark() {
         // Prepare tracked objects with new landmarks
@@ -69,32 +96,6 @@ class FusionSlamTest {
         assertEquals(2, updatedLandmark.getCoordinates().size());  // Ensure the coordinates were updated
     }
 
-    @Test
-    void doMapping_EmptyCoordinates() {
-        // Prepare tracked objects with no coordinates
-        List<TrackedObject> trackedObjects = new ArrayList<>();
-        trackedObjects.add(new TrackedObject("Wall_1", 1, "East wall section", new ArrayList<>()));
 
-        // Perform mapping
-        fusionSlam.doMapping(trackedObjects);
-
-        // Verify that no landmark was added
-        assertFalse(fusionSlam.getLandmarks().containsKey("Wall_1"));
-        assertEquals(0, statisticalFolder.getNumLandmarks());  // Ensure the count is still 0
-    }
-
-    @Test
-    void doMapping_NoPoseForTrackedObject() {
-        // Prepare tracked objects with a time that doesn't match the current pose
-        List<TrackedObject> trackedObjects = new ArrayList<>();
-        trackedObjects.add(new TrackedObject("Wall_1", 2, "East wall section",
-                Arrays.asList(new CloudPoint(0.1, 3.7), new CloudPoint(0.2, 3.8))));
-
-        // Perform mapping with no matching pose
-        fusionSlam.doMapping(trackedObjects);
-
-        // Verify that no landmark was added due to missing pose
-        assertFalse(fusionSlam.getLandmarks().containsKey("Wall_1"));
-    }
 
 }

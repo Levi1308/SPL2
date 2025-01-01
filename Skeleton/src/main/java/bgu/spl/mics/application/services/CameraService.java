@@ -19,7 +19,6 @@ import java.util.List;
  */
 public class CameraService extends MicroService {
     private final Camera camera;
-    private int lastEventTick;
     private ErrorDetails errorDetails;
 
     /**
@@ -30,7 +29,6 @@ public class CameraService extends MicroService {
     public CameraService(Camera camera) {
         super("CameraService_" + camera.getId());
         this.camera = camera;
-        this.lastEventTick = 0;
         errorDetails = ErrorDetails.getInstance();
     }
 
@@ -82,7 +80,6 @@ public class CameraService extends MicroService {
             if (!detectedObjects.isEmpty()) {
                 if (!detectedObjects.get(0).getId().equals("ERROR")) {
                     sendEvent(new DetectObjectsEvent(detectedObjects, this.camera.getTick()));
-                    lastEventTick = camera.getTick();
                     System.out.println("Camera sent DetectObjectsEvent" + camera.getId() + " at tick " + camera.getTick());
                 } else {
                     errorDetails.setError("camera disconnected", "Camera" + camera.getId(), FusionSlam.getInstance().getPosesTill(camera.getTick()));

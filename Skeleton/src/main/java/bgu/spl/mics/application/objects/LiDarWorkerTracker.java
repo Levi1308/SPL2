@@ -65,7 +65,7 @@ public class LiDarWorkerTracker {
         List<TrackedObject> allTrackedObj=new ArrayList<>();
         int frequency= getFrequency();
         for(TrackedObject obj:lidarlist){
-            if(obj.getTime()+frequency==currentTick){
+            if(obj.getTime()+frequency<=currentTick){
                 allTrackedObj.add(obj);
             }
         }

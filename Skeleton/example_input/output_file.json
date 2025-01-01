@@ -1,9 +1,108 @@
 {
   "Statistics": {
-    "systemRuntime": 23,
+    "systemRuntime": 24,
     "numTrackedObjects": 13,
     "numDetectedObjects": 13,
-    "numLandmarks": 0
+    "numLandmarks": 7
   },
-  "landMarks": {}
+  "landMarks": {
+    "Wall_4": {
+      "id": "Wall_4",
+      "description": "Wall",
+      "coordinates": [
+        {
+          "x": 3.2277940094556437,
+          "y": 5.968707277812946
+        },
+        {
+          "x": 2.3944178376520617,
+          "y": 6.638297285609693
+        }
+      ]
+    },
+    "Wall_3": {
+      "id": "Wall_3",
+      "description": "Wall",
+      "coordinates": [
+        {
+          "x": -1.5616733660334288,
+          "y": 6.380103170855121
+        },
+        {
+          "x": -1.7333291329894496,
+          "y": 6.392281824578018
+        }
+      ]
+    },
+    "Circular_Base_1": {
+      "id": "Circular_Base_1",
+      "description": "Circular Base",
+      "coordinates": [
+        {
+          "x": -3.0700932288601543,
+          "y": 1.7225610535308697
+        },
+        {
+          "x": -3.265806720135055,
+          "y": 1.8664173062034222
+        }
+      ]
+    },
+    "Wall_1": {
+      "id": "Wall_1",
+      "description": "Wall",
+      "coordinates": [
+        {
+          "x": -1.8350945768880293,
+          "y": 4.109671228416413
+        },
+        {
+          "x": -1.8622281917081245,
+          "y": 3.8702379145962933
+        }
+      ]
+    },
+    "Chair_Base_1": {
+      "id": "Chair_Base_1",
+      "description": "Chair Base",
+      "coordinates": [
+        {
+          "x": 1.538833204596176,
+          "y": 6.785927576091588
+        },
+        {
+          "x": 1.6905755980731256,
+          "y": 6.46191314229512
+        }
+      ]
+    },
+    "Door": {
+      "id": "Door",
+      "description": "Door",
+      "coordinates": [
+        {
+          "x": -2.913332578606659,
+          "y": -1.1554635639732926
+        },
+        {
+          "x": -2.742785996686237,
+          "y": -1.4731329886827864
+        }
+      ]
+    },
+    "Wall_5": {
+      "id": "Wall_5",
+      "description": "Wall",
+      "coordinates": [
+        {
+          "x": 2.0311697287985853,
+          "y": 2.210082363556954
+        },
+        {
+          "x": 2.092252134770191,
+          "y": 2.1788739888697535
+        }
+      ]
+    }
+  }
 }

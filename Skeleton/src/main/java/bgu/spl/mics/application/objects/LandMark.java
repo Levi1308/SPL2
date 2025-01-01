@@ -41,18 +41,19 @@ public class LandMark {
       int minSize = Math.min(coordinates.size(), points.size());
 
       for (int i = 0; i < minSize; i++) {
-         double x = (coordinates.get(i).getX() + points.get(i).getX()) / 2;
-         double y = (coordinates.get(i).getY() + points.get(i).getY()) / 2;
-         coordinates.set(i, new CloudPoint(x, y));
+         CloudPoint existing = coordinates.get(i);
+         CloudPoint incoming = points.get(i);
+         existing.setX((existing.getX() + incoming.getX()) / 2);
+         existing.setY((existing.getY() + incoming.getY()) / 2);
       }
 
-      // Handle case where new points list is longer
       if (points.size() > coordinates.size()) {
          for (int i = minSize; i < points.size(); i++) {
             coordinates.add(points.get(i));
          }
       }
    }
+
 
 
 }

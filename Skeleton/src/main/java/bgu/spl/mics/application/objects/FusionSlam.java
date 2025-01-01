@@ -35,10 +35,15 @@ public class FusionSlam {
      */
     public static FusionSlam getInstance() {
         if (instance == null) {
-            instance = new FusionSlam();
+            synchronized (FusionSlam.class) {
+                if (instance == null) {
+                    instance = new FusionSlam();
+                }
+            }
         }
         return instance;
     }
+
 
     public void setTick(int tick) {
         this.Tick = tick;
@@ -56,11 +61,11 @@ public class FusionSlam {
     }
 
 
-    public HashMap<Integer, Pose> getPoses() {
+    public synchronized HashMap<Integer, Pose> getPoses() {
         return new HashMap<>(this.Poses);
     }
 
-    public Pose addPose(Pose pose) {
+    public synchronized Pose addPose(Pose pose) {
         this.Poses.put(pose.getTime(), pose);
         this.currentPose = pose;
         return pose;
@@ -75,7 +80,7 @@ public class FusionSlam {
         return poses;
     }
 
-    public void doMapping(List<TrackedObject> trackedObjects) {
+    public synchronized void doMapping(List<TrackedObject> trackedObjects) {
         for (TrackedObject obj : trackedObjects) {
             if (obj.getCoordinate() == null || obj.getCoordinate().isEmpty()) {
                 System.out.println("TrackedObject " + obj.getId() + " has no coordinates.");
@@ -87,7 +92,6 @@ public class FusionSlam {
                 System.out.println("No matching pose for tracked object " + obj.getId() + " at tick " + obj.getTime());
                 continue;
             }
-
             List<CloudPoint> globalPoints = convertToGlobal(obj.getCoordinate(), mappingPose);
             String id = obj.getId();
 
@@ -95,12 +99,14 @@ public class FusionSlam {
                 System.out.println("Updating landmark " + id);
                 LandMark existingLandmark = landmarks.get(id);
                 existingLandmark.UpdateCoordinates(globalPoints);
+
             } else {
                 System.out.println("Adding new landmark " + id);
                 LandMark newLandmark = new LandMark(id, obj.getDescription(), globalPoints);
                 landmarks.put(id, newLandmark);
                 statisticalFolder.incrementLandmarks(1);
             }
+
         }
     }
 

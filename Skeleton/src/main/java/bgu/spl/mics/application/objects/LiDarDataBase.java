@@ -82,6 +82,7 @@ public class LiDarDataBase {
                     doubleList.add(y);
                     cloudPointslist.add(doubleList);
                 }
+                System.out.println("CloudPointslist: "+cloudPointslist);
                 numberObjects++;
                 StampedCloudPoints temp = new StampedCloudPoints(id, time);
                 temp.AddCloudPoint(cloudPointslist);

@@ -59,6 +59,7 @@ public class LiDarService extends MicroService {
         }
         else
         {
+            liDarTracker.setStatus(STATUS.DOWN);
             System.out.println("The Lidar "+liDarTracker.getId()+" detect all object. Terminating at tick" +currentTick);
             terminate();
         }
@@ -78,6 +79,7 @@ public class LiDarService extends MicroService {
         if(!detectedObjectList.isEmpty()) {
             DetectedObject error=liDarTracker.onDetectedObject(currentTime,detectedObjectList);
         if(error!=null){
+            liDarTracker.setStatus(STATUS.ERROR);
             String faultySensor = "LiDar Disconnected";
             sendBroadcast(new CrashedBroadcast(currentTime,error.getDescription(), faultySensor));
             terminate();

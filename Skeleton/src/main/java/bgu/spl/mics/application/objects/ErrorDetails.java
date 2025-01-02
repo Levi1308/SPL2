@@ -79,7 +79,7 @@ public class ErrorDetails {
         return error == null ? "{}" : gson.toJson(this);
     }
 
-    public void serSimulationOutput(SimulationOutput simulationOutput) {
+    public void setSimulationOutput(SimulationOutput simulationOutput) {
         this.simulationOutput = simulationOutput;
     }
 

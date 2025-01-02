@@ -7,26 +7,29 @@ import bgu.spl.mics.application.objects.GPSIMU;
 import bgu.spl.mics.application.messages.TerminatedBroadcast;
 import bgu.spl.mics.application.messages.TickBroadcast;
 import bgu.spl.mics.application.objects.Pose;
+import bgu.spl.mics.application.objects.STATUS;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-
 
 /**
  * PoseService is responsible for maintaining the robot's current pose (position and orientation)
  * and broadcasting PoseEvents at every tick.
  */
 public class PoseService extends MicroService {
-    private GPSIMU gpsimu;
+ private GPSIMU gpsimu;
+
 
 
     public PoseService(GPSIMU gpsimu) {
         super("PoseService");
-        this.gpsimu = gpsimu;
+        this.gpsimu=gpsimu;
 
     }
 
     public void setPoses(List<Pose> poses) {
-        this.gpsimu.setPoses(poses);
+        gpsimu.setPoses(poses);
     }
 
     @Override
@@ -52,17 +55,21 @@ public class PoseService extends MicroService {
     }
 
 
+
     public void onTick(int currentTick) {
         if (!gpsimu.detectAll()) {
-            Pose pose = gpsimu.onTick(currentTick);
+            Pose pose=gpsimu.onTick(currentTick);
             PoseEvent poseEvent = new PoseEvent(pose);
             sendEvent(poseEvent);
             System.out.println("Pose sent at tick " + currentTick);
-        } else {
+        }
+        else {
+            gpsimu.setStatus(STATUS.DOWN);
             System.out.println("All Pose detected. terminating at tick" + currentTick);
             terminate();
         }
     }
+
 
 
 }

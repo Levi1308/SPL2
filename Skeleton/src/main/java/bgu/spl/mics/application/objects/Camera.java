@@ -112,6 +112,9 @@ public class Camera {
         return lastFrame;
     }
 
+    public void setStatus(STATUS status) {
+        this.status = status;
+    }
 }
 
 

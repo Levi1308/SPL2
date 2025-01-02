@@ -82,6 +82,7 @@ public class CameraService extends MicroService {
                     sendEvent(new DetectObjectsEvent(detectedObjects, this.camera.getTick()));
                     System.out.println("Camera sent DetectObjectsEvent" + camera.getId() + " at tick " + camera.getTick());
                 } else {
+                    camera.setStatus(STATUS.ERROR);
                     errorDetails.setError("camera disconnected", "Camera" + camera.getId(), FusionSlam.getInstance().getPosesTill(camera.getTick()));
                     errorDetails.addLastCameraFrame("Camera" + camera.getId(), camera.getLastFrame());
                     sendBroadcast(new CrashedBroadcast(camera.getTick(), "Camera disconnected", "Camera" + camera.getId()));
@@ -94,6 +95,7 @@ public class CameraService extends MicroService {
         }
     else
     {
+        camera.setStatus(STATUS.DOWN);
         System.out.println("Camera " + camera.getId() + " detected all the objects at tick" + camera.getTick());
         terminate();
     }

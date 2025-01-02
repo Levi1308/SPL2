@@ -1,9 +1,10 @@
 package bgu.spl.mics.application.objects;
 
+import bgu.spl.mics.application.messages.PoseEvent;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
 /**
  * Represents the robot's GPS and IMU system.
  * Provides information about the robot's position and movement.
@@ -14,11 +15,12 @@ public class GPSIMU {
     private STATUS status;
     private List<Pose> poses;
     private int sizePoses;
+
     public GPSIMU() {
         currentTick = 0;
         poses = Collections.synchronizedList(new ArrayList<>());
         status = STATUS.UP;
-        sizePoses=0;
+        sizePoses = 0;
     }
 
     public int getCurrentTick() {
@@ -47,7 +49,7 @@ public class GPSIMU {
 
     public void setPoses(List<Pose> poses) {
         this.poses.addAll(poses);
-        sizePoses=poses.size();
+        sizePoses = poses.size();
     }
 
     public Pose onTick(int currentTick) {
@@ -63,7 +65,7 @@ public class GPSIMU {
         }
         return temp;
     }
-    public boolean detectAll(){
-        return sizePoses==0;
-    }
+public boolean detectAll() {
+    return sizePoses == 0;
+}
 }

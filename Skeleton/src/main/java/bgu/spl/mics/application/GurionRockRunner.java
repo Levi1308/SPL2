@@ -168,21 +168,17 @@ public class GurionRockRunner {
 
             if (ErrorDetails.getInstance().getError() != null) {
                 SimulationOutput output = new SimulationOutput(FusionSlam.getInstance().getLandmarks());
-                ErrorDetails.getInstance().serSimulationOutput(output);
+                ErrorDetails.getInstance().setSimulationOutput(output);
                 // Write error to error_output.json
-                saveErrorFile(ErrorDetails.getInstance(), parentDir + File.separator +"error_output.json");
-                // Create empty output_file.json
-                try (FileWriter writer = new FileWriter("output_file.json")) {
-                    writer.write("{}");
-                }
-            } else {
+                saveErrorFile(ErrorDetails.getInstance(), parentDir+File.separator+"output_file.json");
+                
+            }
+             else {
                 // Write simulation output to output_file.json
                 SimulationOutput output = new SimulationOutput(FusionSlam.getInstance().getLandmarks());
                 saveOutputFile(output, parentDir + File.separator + "output_file.json");
-                // Create empty error_output.json
-                try (FileWriter writer = new FileWriter(parentDir + File.separator +"error_output.json")) {
-                    writer.write("{}");
-                }
+                
+                
             }
 
 

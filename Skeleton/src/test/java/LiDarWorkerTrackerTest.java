@@ -68,4 +68,28 @@ class LiDarWorkerTrackerTest {
             assertTrue(trackedAtTick.contains(expected), "The object " + expected.getId() + " should be in the processed list.");
         }
     }
+    @Test
+void onTick_IgnoresEarlyObjects() {
+    // Set currentTick to a value where no objects should be processed
+    currentTick = 2;
+
+    // Get the tracked objects processed at currentTick
+    List<TrackedObject> trackedAtTick = lidar.onTick(currentTick);
+
+    // Assert that no objects are processed before their expected tick
+    assertTrue(trackedAtTick.isEmpty(), "No objects should be processed before their expected tick.");
+
+    // Add an object to the list with a future time
+    TrackedObject futureObject = new TrackedObject(
+        "Future_1", currentTick + 5, "Future object description",
+        Arrays.asList(new CloudPoint(1.0, 1.0), new CloudPoint(1.1, 1.1))
+    );
+    trackedObjects.add(futureObject);
+
+    // Check again at the same tick
+    List<TrackedObject> updatedTrackedAtTick = lidar.onTick(currentTick);
+
+    // Ensure the future object is not processed
+    assertFalse(updatedTrackedAtTick.contains(futureObject), "Future object should not be processed yet.");
+}
 }

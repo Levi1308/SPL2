@@ -44,7 +44,7 @@ public class CameraService extends MicroService {
             onTick();
             if (checkForSensorDisconnection()) {
                 errorDetails.setError("camera disconnected", "Camera" + camera.getId(), FusionSlam.getInstance().getPosesTill(tickBroadcast.getTick()));
-                errorDetails.addLastCameraFrame("Camera" + camera.getId(), camera.getStampedObjects(tickBroadcast.getTick()-1));
+                errorDetails.addLastCameraFrame("Camera" + camera.getId(), camera.getStampedObjects(tickBroadcast.getTick()));
                 sendBroadcast(new CrashedBroadcast(tickBroadcast.getTick(), "camera disconnected", "Camera" + camera.getId()));
                 terminate();
             }

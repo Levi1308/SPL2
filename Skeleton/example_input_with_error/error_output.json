@@ -1,7 +1,17 @@
 {
-  "error": "camera disconnected",
+  "error": "Camera Disconnected",
   "faultySensor": "Camera1",
-  "lastCamerasFrame": {},
+  "lastCamerasFrame": {
+    "Camera1": {
+      "time": 14,
+      "detectedObjects": [
+        {
+          "id": "ERROR",
+          "description": "Camera Disconnected"
+        }
+      ]
+    }
+  },
   "lastLiDarWorkerTrackersFrame": {
     "LiDarWorkerTracker1": [
       {

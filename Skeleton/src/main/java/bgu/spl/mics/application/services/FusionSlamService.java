@@ -63,6 +63,7 @@ public class FusionSlamService extends MicroService {
                 System.out.println("Tracking postponed until pose update at tick " + trackedTime);
                 postponedEvents.add(event);
             }
+            complete(event, trackedObjects);
 
         });
 

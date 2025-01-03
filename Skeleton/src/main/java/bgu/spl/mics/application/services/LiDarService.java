@@ -43,7 +43,8 @@ public class LiDarService extends MicroService {
             onTerminate();
         });
         subscribeEvent(DetectObjectsEvent.class, (DetectObjectsEvent event) -> {
-            onDetectedObject2(event.getTime(),event.getDetectedObjects());
+            onDetectedObject(event.getTime(),event.getDetectedObjects());
+            complete(event, event.getDetectedObjects());
         });
     }
 
@@ -75,21 +76,14 @@ public class LiDarService extends MicroService {
     }
 
 
-    public void onDetectedObject(int currentTime, List<DetectedObject> detectedObjectList){
-        if(!detectedObjectList.isEmpty()) {
-            DetectedObject error=liDarTracker.onDetectedObject(currentTime,detectedObjectList);
-        if(error!=null){
-            liDarTracker.setStatus(STATUS.ERROR);
-            String faultySensor = "LiDar Disconnected";
-            sendBroadcast(new CrashedBroadcast(currentTime,error.getDescription(), faultySensor));
-            terminate();
-        }
-    }
-    }
-    public void onDetectedObject2(int currentTime, List<DetectedObject> detectedObjectList) {
+
+
+    public void onDetectedObject(int currentTime, List<DetectedObject> detectedObjectList) {
         if(!liDarTracker.onDetectedObject2(currentTime,detectedObjectList))
         {
             sendBroadcast(new CrashedBroadcast(currentTime, "Lidar" + liDarTracker.getId(), errorDetails.getError()));
+
         }
+
     }
 }
